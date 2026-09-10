@@ -14,7 +14,7 @@ export default function Header({ onCreate, onSave, onShare }: Props) {
       style={{
         height: 'var(--header-height)',
         background: 'var(--header-bg)',
-        borderBottom: '1px solid #1f2937',
+        borderBottom: '1px solid #1e3a8a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -30,7 +30,7 @@ export default function Header({ onCreate, onSave, onShare }: Props) {
             style={{
               width: 28,
               height: 28,
-              background: '#1d4ed8',
+              background: '#2563eb',
               borderRadius: 6,
               display: 'flex',
               alignItems: 'center',
@@ -46,7 +46,7 @@ export default function Header({ onCreate, onSave, onShare }: Props) {
                 fontWeight: 700,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                color: '#f9fafb',
+                color: '#ffffff',
               }}
             >
               Crimson
@@ -58,17 +58,17 @@ export default function Header({ onCreate, onSave, onShare }: Props) {
           style={{
             width: 1,
             height: 24,
-            background: '#374151',
+            background: '#1e3a8a',
           }}
         />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 500 }}>Case</span>
+          <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>Case</span>
           <span
             style={{
               fontSize: 12,
               fontWeight: 700,
-              color: '#f9fafb',
+              color: '#ffffff',
               fontFamily: 'monospace',
               letterSpacing: '0.05em',
             }}

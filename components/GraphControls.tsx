@@ -19,8 +19,8 @@ const ALL_NODE_TYPES: NodeType[] = ['PERSON', 'PHONE', 'VEHICLE', 'LOCATION', 'O
 const ALL_RISK_LEVELS: RiskLevel[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 const RISK_COLORS: Record<RiskLevel, string> = {
   CRITICAL: '#dc2626',
-  HIGH: '#ea580c',
-  MEDIUM: '#ca8a04',
+  HIGH: '#dc2626',
+  MEDIUM: '#d97706',
   LOW: '#16a34a',
 };
 
@@ -309,7 +309,7 @@ export default function GraphControls({
           {/* Reset filters */}
           <button
             className="btn-ghost"
-            style={{ fontSize: 11, color: '#1d4ed8', padding: '4px 0' }}
+            style={{ fontSize: 11, color: '#2563eb', padding: '4px 0' }}
             onClick={() =>
               onFiltersChange({
                 minConfidence: 0,

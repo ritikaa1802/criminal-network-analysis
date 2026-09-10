@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { MessageSquare, X, Send, ChevronDown, GripVertical } from 'lucide-react';
+import { MessageSquare, ArrowRight, Send, ChevronDown, GripVertical } from 'lucide-react';
 
 const SUGGESTED = [
   'Explain this connection',
@@ -99,7 +99,7 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
           <div
             style={{
               padding: '12px 14px',
-              background: 'var(--header-bg)',
+              background: '#f1f5f9',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -111,7 +111,7 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
                   width: 22,
                   height: 22,
                   borderRadius: 6,
-                  background: '#1d4ed8',
+                  background: '#2563eb',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -120,10 +120,10 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
                 <MessageSquare size={11} color="white" />
               </div>
               <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#f9fafb' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>
                   AI Investigation Assistant
                 </div>
-                <div style={{ fontSize: 10, color: '#6b7280' }}>Ask about the active graph</div>
+                <div style={{ fontSize: 10, color: '#64748b' }}>Ask about the active graph</div>
               </div>
             </div>
             <button
@@ -132,11 +132,11 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#6b7280',
+                color: '#64748b',
               }}
             >
               {docked && <GripVertical size={14} style={{ marginRight: 6, opacity: 0.6 }} />}
-              <X size={14} />
+              <ArrowRight size={14} />
             </button>
           </div>
 
@@ -165,9 +165,8 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
                     maxWidth: '85%',
                     padding: '8px 12px',
                     borderRadius: msg.role === 'user' ? '10px 10px 2px 10px' : '10px 10px 10px 2px',
-                    background:
-                      msg.role === 'user' ? 'var(--text-primary)' : 'var(--surface-2)',
-                    color: msg.role === 'user' ? 'white' : 'var(--text-secondary)',
+                    background: msg.role === 'user' ? '#eff6ff' : '#ffffff',
+                    color: '#0f172a',
                     fontSize: 12,
                     lineHeight: 1.5,
                   }}
@@ -292,7 +291,7 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
         {open ? (
           <ChevronDown size={18} color="white" />
         ) : (
-          <MessageSquare size={18} color="white" />
+          <MessageSquare size={18} color="#2563eb" />
         )}
       </button>}
     </div>

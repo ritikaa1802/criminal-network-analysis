@@ -101,8 +101,7 @@ export default function EmptyState({ onUpload }: Props) {
             width: '100%',
           }}
         >
-          All uploaded data is processed locally within the secure boundary. No data leaves the
-          investigative environment.
+          Upload a source to build a network graph and begin your investigation.
         </div>
       </div>
     </div>

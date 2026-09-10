@@ -3,6 +3,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { ArrowLeft } from 'lucide-react';
 
 import Header from '@/components/Header';
 import InvestigationSummary from '@/components/InvestigationSummary';
@@ -10,7 +11,7 @@ import EmptyState from '@/components/EmptyState';
 import SourcePanel from '@/components/SourcePanel';
 import ProcessingModal from '@/components/ProcessingModal';
 import GraphControls from '@/components/GraphControls';
-import EntityPanel from '@/components/EntityPanel';
+import EntityPanel, { EntityPeek } from '@/components/EntityPanel';
 import EvidencePanel from '@/components/EvidencePanel';
 import NewConnectionsNotification from '@/components/NewConnectionsNotification';
 import AuditDrawer from '@/components/AuditDrawer';
@@ -77,6 +78,8 @@ export default function InvestigationDashboard() {
 
   // ── UI state ──────────────────────────────────────────────────────────────
   const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
+  const [selectedNodePosition, setSelectedNodePosition] = useState<{ x: number; y: number } | null>(null);
+  const [entityDetailOpen, setEntityDetailOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<EdgeData | null>(null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [searchFocusId, setSearchFocusId] = useState<string | null>(null);
@@ -103,6 +106,26 @@ export default function InvestigationDashboard() {
   const highRiskCount = nodes.filter((n) => n.risk === 'HIGH' || n.risk === 'CRITICAL').length;
 
   useEffect(() => {
+    const saved = window.localStorage.getItem('crimson-investigation');
+    if (!saved) return;
+
+    try {
+      const parsed = JSON.parse(saved) as {
+        nodes?: NodeData[];
+        edges?: EdgeData[];
+        sources?: Source[];
+      };
+      if (!parsed.nodes?.length || !parsed.sources?.length) return;
+      setNodes(parsed.nodes);
+      setEdges(parsed.edges ?? []);
+      setSources(parsed.sources);
+      setAppState('GRAPH_ACTIVE');
+    } catch {
+      window.localStorage.removeItem('crimson-investigation');
+    }
+  }, []);
+
+  useEffect(() => {
     if (!resizing) return;
 
     const handlePointerMove = (event: PointerEvent) => {
@@ -123,6 +146,7 @@ export default function InvestigationDashboard() {
   }, [resizing]);
 
   const handleCreate = useCallback(() => {
+    window.localStorage.removeItem('crimson-investigation');
     window.location.reload();
   }, []);
 
@@ -136,9 +160,10 @@ export default function InvestigationDashboard() {
   }, [nodes, edges, sources]);
 
   const handleShare = useCallback(async () => {
+    const investigation = JSON.stringify({ nodes, edges, sources }, null, 2);
     const shareData = {
       title: 'Crimson Investigation',
-      text: `Crimson investigation with ${nodes.length} entities and ${edges.length} relationships.`,
+      text: `Crimson investigation with ${nodes.length} entities and ${edges.length} relationships.\n\n${investigation}`,
       url: window.location.href,
     };
 
@@ -146,8 +171,8 @@ export default function InvestigationDashboard() {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        await navigator.clipboard.writeText(window.location.href);
-        setActionMessage('Share link copied to clipboard');
+        await navigator.clipboard.writeText(investigation);
+        setActionMessage('Investigation data copied to clipboard');
         window.setTimeout(() => setActionMessage(''), 2400);
       }
     } catch {
@@ -328,7 +353,7 @@ export default function InvestigationDashboard() {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 0' }}>
             <span className="label-sm" style={{ color: 'var(--text-muted)' }}>Workspace</span>
-            <button className="btn-icon" onClick={() => setLeftRailOpen(false)} title="Hide left panel">×</button>
+            <button className="btn-icon" onClick={() => setLeftRailOpen(false)} title="Hide left panel"><ArrowLeft size={14} /></button>
           </div>
           <div
             style={{
@@ -402,7 +427,7 @@ export default function InvestigationDashboard() {
             flexDirection: 'column',
             overflow: 'hidden',
             position: 'relative',
-            background: '#fafafa',
+            background: '#f8fafc',
           }}
         >
           {!leftRailOpen && <button className="btn-secondary" style={{ position: 'absolute', top: 14, left: 14, zIndex: 20 }} onClick={() => setLeftRailOpen(true)}>Show workspace</button>}
@@ -443,16 +468,33 @@ export default function InvestigationDashboard() {
                 newEdgeIds={newEdgeIds}
                 filters={filters}
                 searchFocusId={searchFocusId}
-                onNodeSelect={(node) => {
+                onNodeSelect={(node, position) => {
                   setSelectedNode(node);
+                  setSelectedNodePosition(position ?? null);
+                  setEntityDetailOpen(false);
                   if (node) setSelectedEdge(null);
                 }}
                 onEdgeSelect={(edge) => {
                   setSelectedEdge(edge);
+                  setSelectedNodePosition(null);
+                  setEntityDetailOpen(false);
                   if (edge) setSelectedNode(null);
                 }}
                 onNodeExpand={handleNodeExpand}
               />
+
+              {selectedNode && selectedNodePosition && !entityDetailOpen && (
+                <div style={{ position: 'absolute', left: selectedNodePosition.x, top: selectedNodePosition.y, zIndex: 24 }}>
+                  <EntityPeek
+                    node={selectedNode}
+                    onBrief={() => setEntityDetailOpen(true)}
+                    onClose={() => {
+                      setSelectedNode(null);
+                      setSelectedNodePosition(null);
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Graph Legend */}
               {legendOpen && <GraphLegend onClose={() => setLegendOpen(false)} />}
@@ -513,8 +555,8 @@ export default function InvestigationDashboard() {
         <AuditDrawer source={auditSource} onClose={() => setAuditSource(null)} />
       )}
       {selectedNode && (
-        <div style={{ position: 'fixed', top: 'var(--header-height)', right: rightRailOpen ? rightWidth + 6 : 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
-          <EntityPanel node={selectedNode} onClose={() => setSelectedNode(null)} onExpandNetwork={handleNodeExpand} />
+        entityDetailOpen && <div style={{ position: 'fixed', top: 'var(--header-height)', right: rightRailOpen ? rightWidth + 6 : 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
+          <EntityPanel node={selectedNode} onClose={() => setEntityDetailOpen(false)} onExpandNetwork={handleNodeExpand} />
         </div>
       )}
       {selectedEdge && !selectedNode && (

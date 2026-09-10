@@ -11,10 +11,10 @@ interface Props {
 
 export default function InvestigationSummary({ entities, relationships, highRisk, sources }: Props) {
   const stats = [
-    { label: 'Entities', value: entities, icon: <Users size={13} />, color: '#1e3a8a' },
-    { label: 'Relationships', value: relationships, icon: <GitBranch size={13} />, color: '#0369a1' },
+    { label: 'Entities', value: entities, icon: <Users size={13} />, color: '#2563eb' },
+    { label: 'Relationships', value: relationships, icon: <GitBranch size={13} />, color: '#0284c7' },
     { label: 'High Risk', value: highRisk, icon: <AlertTriangle size={13} />, color: '#dc2626' },
-    { label: 'Sources', value: sources, icon: <FileText size={13} />, color: '#6d28d9' },
+    { label: 'Sources', value: sources, icon: <FileText size={13} />, color: '#7c3aed' },
   ];
 
   return (

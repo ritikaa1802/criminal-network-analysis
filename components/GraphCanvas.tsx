@@ -36,7 +36,7 @@ interface Props {
   newEdgeIds: string[];
   filters: Filters;
   searchFocusId: string | null;
-  onNodeSelect: (node: NodeData | null) => void;
+  onNodeSelect: (node: NodeData | null, position?: { x: number; y: number }) => void;
   onEdgeSelect: (edge: EdgeData | null) => void;
   onNodeExpand: (nodeId: string) => void;
 }
@@ -208,7 +208,8 @@ const GraphCanvas = forwardRef<GraphCanvasRef, Props>((props, ref) => {
         node.select();
         node.neighborhood().nodes().addClass('highlighted');
 
-        onNodeSelect(nodeData);
+        const position = node.renderedPosition();
+        onNodeSelect(nodeData, { x: position.x, y: position.y });
         onEdgeSelect(null);
       });
 
@@ -519,7 +520,7 @@ function Row({ label, value, highlight }: { label: string; value: any; highlight
   return (
     <div style={{ display: 'flex', gap: 6, fontSize: 11 }}>
       <span style={{ color: '#9ca3af', width: 70, flexShrink: 0 }}>{label}</span>
-      <span style={{ fontWeight: 600, color: highlight ? '#f87171' : '#f9fafb' }}>{value}</span>
+      <span style={{ fontWeight: 600, color: highlight ? '#dc2626' : '#0f172a' }}>{value}</span>
     </div>
   );
 }

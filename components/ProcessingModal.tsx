@@ -181,7 +181,7 @@ export default function ProcessingModal({ filename, isAdditional, onComplete }: 
 
                 {/* Active indicator */}
                 {isActive && (
-                  <span style={{ fontSize: 10, color: '#1d4ed8', fontWeight: 600, marginLeft: 'auto' }}>
+                  <span style={{ fontSize: 10, color: '#2563eb', fontWeight: 600, marginLeft: 'auto' }}>
                     Processing…
                   </span>
                 )}

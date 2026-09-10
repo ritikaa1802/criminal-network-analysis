@@ -1,6 +1,6 @@
 'use client';
 
-import { X, User, Phone, Car, MapPin, Building2, CreditCard, FileText, ChevronRight, Maximize2 } from 'lucide-react';
+import { ArrowLeft, User, Phone, Car, MapPin, Building2, CreditCard, FileText, ChevronRight, Maximize2 } from 'lucide-react';
 import type { NodeData, NodeType } from '@/lib/types';
 import { NODE_COLORS } from '@/lib/graphConfig';
 
@@ -59,8 +59,8 @@ export default function EntityPanel({ node, onClose, onExpandNetwork }: Props) {
         >
           Entity Intelligence
         </span>
-        <button className="btn-icon" onClick={onClose}>
-          <X size={13} />
+        <button className="btn-icon" onClick={onClose} title="Back to graph">
+          <ArrowLeft size={14} />
         </button>
       </div>
 
@@ -217,7 +217,7 @@ export default function EntityPanel({ node, onClose, onExpandNetwork }: Props) {
               border: '1px solid #bfdbfe',
               borderRadius: 7,
               fontSize: 11,
-              color: '#1d4ed8',
+              color: '#2563eb',
               display: 'flex',
               alignItems: 'center',
               gap: 6,
@@ -258,6 +258,60 @@ export default function EntityPanel({ node, onClose, onExpandNetwork }: Props) {
           Close Panel
         </button>
       </div>
+    </div>
+  );
+}
+
+export function EntityPeek({
+  node,
+  onBrief,
+  onClose,
+}: {
+  node: NodeData;
+  onBrief: () => void;
+  onClose: () => void;
+}) {
+  const color = NODE_COLORS[node.type];
+
+  return (
+    <div
+      className="fade-in elevated-panel"
+      style={{
+        position: 'absolute',
+        width: 220,
+        padding: 12,
+        transform: 'translate(18px, -50%)',
+        background: '#ffffff',
+        border: '1px solid var(--panel-border)',
+        borderRadius: 8,
+        boxShadow: 'var(--panel-shadow)',
+        zIndex: 25,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+        <div style={{ width: 28, height: 28, borderRadius: 7, display: 'grid', placeItems: 'center', background: color, color: '#ffffff', flexShrink: 0 }}>
+          {TYPE_ICONS[node.type]}
+        </div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 6 }}>
+            <strong style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</strong>
+            <button className="btn-icon" onClick={onClose} title="Dismiss entity brief" style={{ width: 20, height: 20 }}>
+              <ArrowLeft size={12} />
+            </button>
+          </div>
+          <div style={{ marginTop: 4, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+            <span className={`type-badge type-${node.type}`} style={{ fontSize: 8 }}>{node.type}</span>
+            <span className={`risk-badge risk-${node.risk.toLowerCase()}`} style={{ fontSize: 8 }}>{node.risk}</span>
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, margin: '10px 0', fontSize: 10, color: 'var(--text-secondary)' }}>
+        <span>Confidence <strong style={{ color: 'var(--text-primary)' }}>{node.confidence}%</strong></span>
+        <span>Links <strong style={{ color: 'var(--text-primary)' }}>{node.connectionCount ?? 0}</strong></span>
+      </div>
+      <button className="btn-secondary" onClick={onBrief} style={{ width: '100%', justifyContent: 'center', padding: '6px 10px', fontSize: 11 }}>
+        Brief
+      </button>
     </div>
   );
 }

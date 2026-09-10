@@ -1,13 +1,13 @@
 import type { NodeType, RiskLevel } from './types';
 
 export const NODE_COLORS: Record<NodeType, string> = {
-  PERSON: '#1e3a8a',
-  PHONE: '#0369a1',
-  VEHICLE: '#166534',
-  LOCATION: '#6d28d9',
-  ORGANIZATION: '#92400e',
-  ACCOUNT: '#991b1b',
-  DOCUMENT: '#155e75',
+  PERSON: '#2563eb',
+  PHONE: '#0284c7',
+  VEHICLE: '#16a34a',
+  LOCATION: '#7c3aed',
+  ORGANIZATION: '#1e3a8a',
+  ACCOUNT: '#1e3a8a',
+  DOCUMENT: '#1e3a8a',
 };
 
 export const NODE_SHAPES: Record<NodeType, string> = {
@@ -22,9 +22,9 @@ export const NODE_SHAPES: Record<NodeType, string> = {
 
 export const RISK_BORDER_COLORS: Record<RiskLevel, string> = {
   CRITICAL: '#dc2626',
-  HIGH: '#ea580c',
-  MEDIUM: '#ca8a04',
-  LOW: '#6b7280',
+  HIGH: '#dc2626',
+  MEDIUM: '#d97706',
+  LOW: '#94a3b8',
 };
 
 export const RISK_BORDER_WIDTHS: Record<RiskLevel, number> = {
@@ -36,12 +36,12 @@ export const RISK_BORDER_WIDTHS: Record<RiskLevel, number> = {
 
 export const RISK_EDGE_COLORS: Record<RiskLevel, string> = {
   CRITICAL: '#dc2626',
-  HIGH: '#ea580c',
-  MEDIUM: '#ca8a04',
-  LOW: '#9ca3af',
+  HIGH: '#dc2626',
+  MEDIUM: '#d97706',
+  LOW: '#94a3b8',
 };
 
-export const NEW_HIGHLIGHT_COLOR = '#06b6d4'; // cyan
+export const NEW_HIGHLIGHT_COLOR = '#2563eb';
 
 export function getCytoscapeStylesheet() {
   const styles: any[] = [
@@ -49,8 +49,8 @@ export function getCytoscapeStylesheet() {
     {
       selector: 'node',
       style: {
-        'background-color': '#1e3a8a',
-        'border-color': '#1e3a8a',
+        'background-color': '#2563eb',
+        'border-color': '#2563eb',
         'border-width': 2,
         color: '#ffffff',
         'font-family': 'Inter, system-ui, sans-serif',
@@ -98,7 +98,7 @@ export function getCytoscapeStylesheet() {
       style: {
         'border-color': NEW_HIGHLIGHT_COLOR,
         'border-width': 5,
-        'background-color': '#164e63',
+        'background-color': '#1e3a8a',
       },
     },
 
@@ -112,9 +112,9 @@ export function getCytoscapeStylesheet() {
     {
       selector: 'node:selected',
       style: {
-        'border-color': '#f59e0b',
+        'border-color': '#2563eb',
         'border-width': 5,
-        'background-color': '#78350f',
+        'background-color': '#1e3a8a',
         'z-index': 20,
       },
     },
@@ -130,8 +130,8 @@ export function getCytoscapeStylesheet() {
       selector: 'edge',
       style: {
         width: 2,
-        'line-color': '#9ca3af',
-        'target-arrow-color': '#9ca3af',
+        'line-color': '#d97706',
+        'target-arrow-color': '#d97706',
         'target-arrow-shape': 'triangle',
         'arrow-scale': 1.2,
         'curve-style': 'bezier',
@@ -139,7 +139,7 @@ export function getCytoscapeStylesheet() {
         'font-family': 'Inter, system-ui, sans-serif',
         'font-size': '9px',
         'font-weight': '500',
-        color: '#374151',
+        color: '#0f172a',
         'text-rotation': 'autorotate',
         'text-margin-y': -8,
         'text-background-color': '#ffffff',
@@ -186,8 +186,8 @@ export function getCytoscapeStylesheet() {
     {
       selector: 'edge:selected',
       style: {
-        'line-color': '#f59e0b',
-        'target-arrow-color': '#f59e0b',
+        'line-color': '#2563eb',
+        'target-arrow-color': '#2563eb',
         width: 4,
         'z-index': 20,
       },

@@ -1,6 +1,6 @@
 'use client';
 
-import { X, ArrowDown, FileText, Calendar, Shield } from 'lucide-react';
+import { ArrowLeft, ArrowDown, FileText, Calendar, Shield } from 'lucide-react';
 import type { EdgeData, NodeData } from '@/lib/types';
 
 interface Props {
@@ -49,8 +49,8 @@ export default function EvidencePanel({ edge, nodes, onClose }: Props) {
         >
           Relationship Evidence
         </span>
-        <button className="btn-icon" onClick={onClose}>
-          <X size={13} />
+        <button className="btn-icon" onClick={onClose} title="Back to graph">
+          <ArrowLeft size={14} />
         </button>
       </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { GripVertical, X } from 'lucide-react';
+import { GripVertical, ArrowLeft } from 'lucide-react';
 import { NODE_COLORS } from '@/lib/graphConfig';
 import type { NodeType } from '@/lib/types';
 
@@ -17,9 +17,9 @@ const SHAPE_ICONS: Record<NodeType, string> = {
 
 const RISK_ITEMS = [
   { label: 'Critical', color: '#dc2626', border: '3px solid #dc2626' },
-  { label: 'High', color: '#ea580c', border: '3px solid #ea580c' },
-  { label: 'Medium', color: '#ca8a04', border: '2px solid #ca8a04' },
-  { label: 'Low', color: '#6b7280', border: '2px solid #6b7280' },
+  { label: 'High', color: '#dc2626', border: '3px solid #dc2626' },
+  { label: 'Medium', color: '#d97706', border: '2px solid #d97706' },
+  { label: 'Low', color: '#94a3b8', border: '2px solid #94a3b8' },
 ];
 
 const NODE_TYPES: NodeType[] = [
@@ -68,7 +68,7 @@ export default function GraphLegend({ onClose }: Props) {
         position: 'absolute',
         bottom: position.y,
         left: position.x,
-        background: 'rgba(255,255,255,0.95)',
+        background: '#ffffff',
         border: '1px solid var(--border)',
         borderRadius: 8,
         padding: 12,
@@ -98,7 +98,7 @@ export default function GraphLegend({ onClose }: Props) {
         </span>
         {onClose && (
           <button className="btn-icon" onClick={onClose} title="Hide legend">
-            <X size={12} />
+            <ArrowLeft size={12} />
           </button>
         )}
       </div>
@@ -182,7 +182,7 @@ export default function GraphLegend({ onClose }: Props) {
             height: 10,
             borderRadius: 3,
             background: 'transparent',
-            border: '3px solid #06b6d4',
+            border: '3px solid #2563eb',
           }}
         />
         <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500 }}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { X, ArrowDown, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowDown, Zap } from 'lucide-react';
 import { DATASET_2_NEW_EDGES } from '@/lib/mockData';
 import type { NodeData } from '@/lib/types';
 
@@ -73,8 +73,8 @@ export default function NewConnectionsNotification({
             </div>
           </div>
         </div>
-        <button className="btn-icon" onClick={onDismiss} style={{ marginTop: -2 }}>
-          <X size={12} />
+        <button className="btn-icon" onClick={onDismiss} style={{ marginTop: -2 }} title="Back to graph">
+          <ArrowLeft size={12} />
         </button>
       </div>
 

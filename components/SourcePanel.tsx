@@ -20,7 +20,7 @@ function getFileIcon(type: Source['type']) {
       return <FileSpreadsheet size={13} color="#166534" />;
     case 'JPG':
     case 'PNG':
-      return <Image size={13} color="#6d28d9" />;
+      return <Image size={13} color="#7c3aed" />;
     default:
       return <File size={13} color="#6b7280" />;
   }
