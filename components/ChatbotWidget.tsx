@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bot, MessageSquare, X, Send, ChevronDown, GripVertical } from 'lucide-react';
 
 const SUGGESTED = [
@@ -34,9 +34,10 @@ interface Props {
   docked?: boolean;
   onClose?: () => void;
   headerMode?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export default function ChatbotWidget({ docked = false, onClose, headerMode = false }: Props) {
+export default function ChatbotWidget({ docked = false, onClose, headerMode = false, onOpenChange }: Props) {
   const [open, setOpen] = useState(true);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -47,6 +48,10 @@ export default function ChatbotWidget({ docked = false, onClose, headerMode = fa
   ]);
   const [input, setInput] = useState('');
   const messageIdRef = useRef(0);
+
+  useEffect(() => {
+    if (headerMode) onOpenChange?.(open);
+  }, [headerMode, onOpenChange, open]);
 
   const sendMessage = (text: string) => {
     if (!text.trim()) return;

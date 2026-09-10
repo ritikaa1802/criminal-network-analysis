@@ -1,6 +1,6 @@
 'use client';
 
-import { X, User, Phone, Car, MapPin, Building2, CreditCard, FileText, ChevronRight, Maximize2 } from 'lucide-react';
+import { X, User, Phone, Car, MapPin, Building2, CreditCard, FileText, ChevronRight, Maximize2, StickyNote } from 'lucide-react';
 import type { NodeData, NodeType } from '@/lib/types';
 import { NODE_COLORS } from '@/lib/graphConfig';
 
@@ -268,10 +268,12 @@ export default function EntityPanel({ node, onClose, onExpandNetwork, floating =
 export function EntityPeek({
   node,
   onBrief,
+  onAddNote,
   onClose,
 }: {
   node: NodeData;
   onBrief: () => void;
+  onAddNote: () => void;
   onClose: () => void;
 }) {
   const color = NODE_COLORS[node.type];
@@ -317,6 +319,9 @@ export function EntityPeek({
       </div>
       <button className="btn-secondary" onClick={onBrief} style={{ width: '100%', justifyContent: 'center', padding: '6px 10px', fontSize: 11 }}>
         Open full brief
+      </button>
+      <button className="sticky-add-button" onClick={onAddNote}>
+        <StickyNote size={12} /> Add sticky note
       </button>
     </div>
   );

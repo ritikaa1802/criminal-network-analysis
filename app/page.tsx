@@ -3,7 +3,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { PanelLeft, X } from 'lucide-react';
+import { PanelLeft, X, StickyNote } from 'lucide-react';
 
 import Header from '@/components/Header';
 import InvestigationSummary from '@/components/InvestigationSummary';
@@ -27,6 +27,13 @@ import {
   resolveDataset,
 } from '@/lib/mockData';
 import type { NodeData, EdgeData, Source, Filters, AppState, RiskLevel, NodeType } from '@/lib/types';
+
+interface InvestigationNote {
+  id: string;
+  nodeId: string;
+  text: string;
+  color: 'yellow' | 'pink' | 'blue' | 'green';
+}
 
 // GraphCanvas uses Cytoscape which is browser-only — load dynamically
 const GraphCanvas = dynamic(() => import('@/components/GraphCanvas'), {
@@ -77,6 +84,7 @@ export default function InvestigationDashboard() {
 
   // ── UI state ──────────────────────────────────────────────────────────────
   const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
+  const [selectedGraphPosition, setSelectedGraphPosition] = useState<{ x: number; y: number } | null>(null);
   const [selectedNodePosition, setSelectedNodePosition] = useState<{ x: number; y: number } | null>(null);
   const [entityDetailOpen, setEntityDetailOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<EdgeData | null>(null);
@@ -97,6 +105,8 @@ export default function InvestigationDashboard() {
   const [rightWidth, setRightWidth] = useState(340);
   const [resizing, setResizing] = useState<'left' | 'right' | null>(null);
   const [actionMessage, setActionMessage] = useState('');
+  const [connorOpen, setConnorOpen] = useState(true);
+  const [stickyNotes, setStickyNotes] = useState<InvestigationNote[]>([]);
   const graphAreaRef = useRef<HTMLDivElement>(null);
 
   // ── Graph ref ─────────────────────────────────────────────────────────────
@@ -126,6 +136,17 @@ export default function InvestigationDashboard() {
   }, []);
 
   useEffect(() => {
+    const saved = window.localStorage.getItem('crimson-sticky-notes');
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved);
+      setStickyNotes(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setStickyNotes([]);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!resizing) return;
 
     const handlePointerMove = (event: PointerEvent) => {
@@ -147,8 +168,14 @@ export default function InvestigationDashboard() {
 
   const handleCreate = useCallback(() => {
     window.localStorage.removeItem('crimson-investigation');
+    window.localStorage.removeItem('crimson-sticky-notes');
     window.location.reload();
   }, []);
+
+  const persistStickyNotes = (nextNotes: InvestigationNote[]) => {
+    setStickyNotes(nextNotes);
+    window.localStorage.setItem('crimson-sticky-notes', JSON.stringify(nextNotes));
+  };
 
   const handleSave = useCallback(() => {
     window.localStorage.setItem(
@@ -332,6 +359,7 @@ export default function InvestigationDashboard() {
         onCreate={handleCreate}
         onSave={handleSave}
         onShare={handleShare}
+        onConnorOpenChange={setConnorOpen}
       />
 
       {/* ── Main layout ─────────────────────────────────────────────────────── */}
@@ -483,6 +511,7 @@ export default function InvestigationDashboard() {
                 searchFocusId={searchFocusId}
                 onNodeSelect={(node, position) => {
                   setSelectedNode(node);
+                  setSelectedGraphPosition(position ?? null);
                   if (position && graphAreaRef.current) {
                     const bounds = graphAreaRef.current.getBoundingClientRect();
                     const panelWidth = 360;
@@ -500,6 +529,7 @@ export default function InvestigationDashboard() {
                   setSelectedEdge(edge);
                   if (edge) {
                     setSelectedNode(null);
+                    setSelectedGraphPosition(null);
                     setSelectedNodePosition(null);
                     setEntityDetailOpen(false);
                   }
@@ -512,13 +542,57 @@ export default function InvestigationDashboard() {
                   <EntityPeek
                     node={selectedNode}
                     onBrief={() => setEntityDetailOpen(true)}
+                    onAddNote={() => {
+                      const note = { id: `sticky-${Date.now()}`, nodeId: selectedNode.id, text: '', color: 'yellow' as const };
+                      persistStickyNotes([...stickyNotes, note]);
+                    }}
                     onClose={() => {
                       setSelectedNode(null);
+                      setSelectedGraphPosition(null);
                       setSelectedNodePosition(null);
                     }}
                   />
                 </div>
               )}
+
+              {selectedNode && selectedGraphPosition && stickyNotes.filter((note) => note.nodeId === selectedNode.id).map((note) => (
+                <div
+                  key={note.id}
+                  className={`sticky-note sticky-${note.color}`}
+                  style={{
+                    left: graphAreaRef.current
+                      ? Math.min(selectedGraphPosition.x + 110, graphAreaRef.current.clientWidth - 202)
+                      : selectedGraphPosition.x + 110,
+                    top: Math.min(Math.max(70, selectedGraphPosition.y), graphAreaRef.current ? graphAreaRef.current.clientHeight - 80 : selectedGraphPosition.y),
+                  }}
+                >
+                  <div className="sticky-note-header">
+                    <StickyNote size={12} />
+                    <button onClick={() => persistStickyNotes(stickyNotes.filter((item) => item.id !== note.id))} title="Delete sticky note">×</button>
+                  </div>
+                  <textarea
+                    autoFocus={!note.text}
+                    value={note.text}
+                    placeholder="Important detail..."
+                    onChange={(event) => persistStickyNotes(stickyNotes.map((item) => item.id === note.id ? { ...item, text: event.target.value } : item))}
+                  />
+                  <div className="sticky-colors">
+                    {(['yellow', 'pink', 'blue', 'green'] as const).map((color) => (
+                      <button key={color} className={`sticky-color-dot sticky-color-${color}`} onClick={() => persistStickyNotes(stickyNotes.map((item) => item.id === note.id ? { ...item, color } : item))} aria-label={`Use ${color} sticky color`} />
+                    ))}
+                    <button
+                      className="sticky-save-button"
+                      onClick={() => {
+                        persistStickyNotes(stickyNotes);
+                        setActionMessage('Sticky note saved');
+                        window.setTimeout(() => setActionMessage(''), 1800);
+                      }}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ))}
 
               {selectedNode && selectedNodePosition && entityDetailOpen && (
                 <div style={{ position: 'absolute', left: selectedNodePosition.x, top: selectedNodePosition.y, transform: 'translateY(-50%)' }}>

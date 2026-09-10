@@ -7,9 +7,10 @@ interface Props {
   onCreate: () => void;
   onSave: () => void;
   onShare: () => void;
+  onConnorOpenChange: (open: boolean) => void;
 }
 
-export default function Header({ onCreate, onSave, onShare }: Props) {
+export default function Header({ onCreate, onSave, onShare, onConnorOpenChange }: Props) {
   return (
     <header
       style={{
@@ -93,7 +94,7 @@ export default function Header({ onCreate, onSave, onShare }: Props) {
           <Share2 size={14} />
           <span>Share</span>
         </button>
-        <ChatbotWidget headerMode />
+        <ChatbotWidget headerMode onOpenChange={onConnorOpenChange} />
       </div>
     </header>
   );
