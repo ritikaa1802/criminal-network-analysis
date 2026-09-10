@@ -7,7 +7,7 @@ const SUGGESTED = [
   'Explain this connection',
   'Show high-risk entities',
   'Find new connections',
-  'Summarize Person_A',
+  'Summarize Ramlal',
   'Which entities share sources?',
 ];
 
@@ -15,13 +15,13 @@ const MOCK_RESPONSES: Record<string, string> = {
   'Explain this connection':
     'The selected relationship was established through CDR analysis showing repeated high-frequency communication between the entities during the investigation period. Confidence is 96% based on call volume, duration patterns, and corroborating location data.',
   'Show high-risk entities':
-    'There are 3 HIGH or CRITICAL risk entities in the current network: Person_A (HIGH, 94%), Organization_Z (CRITICAL, 89%), and Person_C (CRITICAL, 91%). Person_C was discovered through the CDR source and has direct links to entities already present in the network.',
+    'There are 3 HIGH or CRITICAL risk entities in the current network: Ramlal (HIGH, 94%), The Syndicate (CRITICAL, 89%), and Prashant (CRITICAL, 91%). Prashant was discovered through the CDR source and has direct links to entities already present in the network.',
   'Find new connections':
-    'After analyzing CDR_2026_004.csv, 7 new relationships were discovered. The most significant is Person_C → Phone_9821 (FREQUENT_CONTACT, 89%), which links Person_C to Person_A\'s established communication network — a connection not visible from the FIR alone.',
-  'Summarize Person_A':
-    'Person_A is a HIGH risk entity with 94% confidence, referenced in FIR_2026_001.pdf. They have 7 known connections including Phone_9821, Person_B, Organization_Z, and Location_X. CDR analysis added Phone_7742 as a second communication channel.',
+    'After analyzing CDR_2026_004.csv, 7 new relationships were discovered. The most significant is Prashant → 92832983923892 (FREQUENT_CONTACT, 89%), which links Prashant to Ramlal\'s established communication network — a connection not visible from the FIR alone.',
+  'Summarize Ramlal':
+    'Ramlal is a HIGH risk entity with 94% confidence, referenced in FIR_2026_001.pdf. They have 7 known connections including 92832983923892, Athrv, The Syndicate, and Kanpur. CDR analysis added 9922334455 as a second communication channel.',
   'Which entities share sources?':
-    'Person_A and Person_B both appear in FIR_2026_001.pdf and CDR_2026_004.csv. Phone_9821 appears in both FIR_2026_001.pdf (communication reference) and CDR_2026_004.csv (as a contact for Person_C), making it a critical bridge entity.',
+    'Ramlal and Athrv both appear in FIR_2026_001.pdf and CDR_2026_004.csv. 92832983923892 appears in both FIR_2026_001.pdf (communication reference) and CDR_2026_004.csv (as a contact for Prashant), making it a critical bridge entity.',
 };
 
 interface Message {
@@ -132,7 +132,7 @@ export default function ChatbotWidget({ docked = false, onClose, headerMode = fa
                   width: 22,
                   height: 22,
                   borderRadius: 6,
-                  background: '#2563eb',
+                  background: 'var(--accent-primary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -312,7 +312,7 @@ export default function ChatbotWidget({ docked = false, onClose, headerMode = fa
         {open ? (
           <ChevronDown size={18} color="white" />
         ) : (
-          <MessageSquare size={18} color="#2563eb" />
+          <MessageSquare size={18} color="var(--accent-primary)" />
         )}
       </button>}
     </div>

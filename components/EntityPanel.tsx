@@ -216,11 +216,11 @@ export default function EntityPanel({ node, onClose, onExpandNetwork, floating =
           <div
             style={{
               padding: '10px 12px',
-              background: '#eff6ff',
-              border: '1px solid #bfdbfe',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
               borderRadius: 7,
               fontSize: 11,
-              color: '#2563eb',
+              color: 'var(--accent-primary)',
               display: 'flex',
               alignItems: 'center',
               gap: 6,

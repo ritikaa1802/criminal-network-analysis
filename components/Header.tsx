@@ -16,7 +16,7 @@ export default function Header({ onCreate, onSave, onShare, onConnorOpenChange }
       style={{
         height: 'var(--header-height)',
         background: 'var(--header-bg)',
-        borderBottom: '1px solid #1e3a8a',
+        borderBottom: '1px solid #4a1515',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -28,19 +28,7 @@ export default function Header({ onCreate, onSave, onShare, onConnorOpenChange }
       {/* Left: Branding + Case */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              background: '#2563eb',
-              borderRadius: 6,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <LinkIcon size={14} color="white" />
-          </div>
+          <img src="/logo.png" alt="Crimson Logo" style={{ width: 28, height: 28, objectFit: 'contain' }} />
           <div>
             <div
               style={{
@@ -60,7 +48,7 @@ export default function Header({ onCreate, onSave, onShare, onConnorOpenChange }
           style={{
             width: 1,
             height: 24,
-            background: '#1e3a8a',
+            background: '#4a1515',
           }}
         />
 

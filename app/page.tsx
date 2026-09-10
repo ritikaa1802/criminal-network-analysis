@@ -503,28 +503,35 @@ export default function InvestigationDashboard() {
               <PanelLeft size={15} />
             </button>
           )}
+          {/* Demo shortcut for prototype demonstration */}
+          {appState === 'EMPTY' && (
+            <button
+              onClick={loadDemo}
+              style={{
+                position: 'absolute',
+                top: 20,
+                left: leftRailOpen ? 20 : 60, // account for collapsed sidebar tab if needed
+                zIndex: 10,
+                background: 'var(--surface-0)',
+                border: '1px solid var(--accent-primary)',
+                borderRadius: 6,
+                padding: '8px 18px',
+                fontSize: 12,
+                fontWeight: 500,
+                color: 'var(--accent-primary)',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              }}
+            >
+              Load Demo Investigation
+            </button>
+          )}
+
           {/* Empty state */}
           {appState === 'EMPTY' && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <EmptyState onUpload={handleFileUpload} />
-              {/* Demo shortcut for prototype demonstration */}
-              <div style={{ textAlign: 'center', paddingBottom: 20 }}>
-                <button
-                  onClick={loadDemo}
-                  style={{
-                    background: 'none',
-                    border: '1px dashed var(--border-strong)',
-                    borderRadius: 6,
-                    padding: '6px 16px',
-                    fontSize: 11,
-                    color: 'var(--text-muted)',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  Load Demo Investigation
-                </button>
-              </div>
             </div>
           )}
 

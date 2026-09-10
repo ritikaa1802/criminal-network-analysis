@@ -134,11 +134,11 @@ export default function ProcessingModal({ filename, isAdditional, onComplete }: 
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
-                    background: isDone ? '#166534' : isActive ? '#1e3a8a' : 'var(--surface-2)',
+                    background: isDone ? '#166534' : isActive ? 'var(--accent-primary)' : 'var(--surface-2)',
                     border: isDone
                       ? '1px solid #166534'
                       : isActive
-                      ? '1px solid #1e3a8a'
+                      ? '1px solid var(--accent-primary)'
                       : '1px solid var(--border)',
                     transition: 'all 0.3s ease',
                   }}
@@ -181,7 +181,7 @@ export default function ProcessingModal({ filename, isAdditional, onComplete }: 
 
                 {/* Active indicator */}
                 {isActive && (
-                  <span style={{ fontSize: 10, color: '#2563eb', fontWeight: 600, marginLeft: 'auto' }}>
+                  <span style={{ fontSize: 10, color: 'var(--accent-primary)', fontWeight: 600, marginLeft: 'auto' }}>
                     Processing…
                   </span>
                 )}

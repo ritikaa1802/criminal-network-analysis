@@ -575,7 +575,6 @@ function EdgeTooltip({ data }: { data: any }) {
     <div>
       <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4 }}>{data.relationship}</div>
       <Row label="Confidence" value={`${data.confidence}%`} />
-      <Row label="Risk" value={data.risk} />
     </div>
   );
 }
@@ -584,7 +583,7 @@ function Row({ label, value, highlight }: { label: string; value: any; highlight
   return (
     <div style={{ display: 'flex', gap: 6, fontSize: 11 }}>
       <span style={{ color: '#9ca3af', width: 70, flexShrink: 0 }}>{label}</span>
-      <span style={{ fontWeight: 600, color: highlight ? '#dc2626' : '#0f172a' }}>{value}</span>
+      <span style={{ fontWeight: 600, color: highlight ? 'var(--accent-primary)' : 'white' }}>{value}</span>
     </div>
   );
 }
