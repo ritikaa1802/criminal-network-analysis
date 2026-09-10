@@ -43,7 +43,7 @@ export default function Header() {
                 color: '#f9fafb',
               }}
             >
-              AI Criminal Network Analysis
+              Crimson
             </div>
           </div>
         </div>

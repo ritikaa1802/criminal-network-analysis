@@ -9,9 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Criminal Network Analysis | AI Investigation Platform',
+  title: 'Crimson | AI Investigation Platform',
   description:
-    'AI-powered criminal network analysis system for investigators. Upload evidence, extract entities, and visualize criminal networks.',
+    'Crimson is an AI-powered investigation platform for uploading evidence, extracting entities, and visualizing criminal networks.',
 };
 
 export default function RootLayout({
