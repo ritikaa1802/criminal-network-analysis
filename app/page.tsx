@@ -1,69 +1,461 @@
-import Image from "next/image";
+'use client';
+// @ts-nocheck
 
-export default function Home() {
+import { useState, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+
+import Header from '@/components/Header';
+import InvestigationSummary from '@/components/InvestigationSummary';
+import EmptyState from '@/components/EmptyState';
+import SourcePanel from '@/components/SourcePanel';
+import ProcessingModal from '@/components/ProcessingModal';
+import GraphControls from '@/components/GraphControls';
+import EntityPanel from '@/components/EntityPanel';
+import EvidencePanel from '@/components/EvidencePanel';
+import NewConnectionsNotification from '@/components/NewConnectionsNotification';
+import AuditDrawer from '@/components/AuditDrawer';
+import ChatbotWidget from '@/components/ChatbotWidget';
+import GraphLegend from '@/components/GraphLegend';
+
+import {
+  DATASET_1_NODES,
+  DATASET_1_EDGES,
+  DATASET_2_NEW_NODES,
+  DATASET_2_NEW_EDGES,
+  EXPANDABLE_NEIGHBORS,
+  buildSource,
+  resolveDataset,
+} from '@/lib/mockData';
+import type { NodeData, EdgeData, Source, Filters, AppState, RiskLevel, NodeType } from '@/lib/types';
+
+// GraphCanvas uses Cytoscape which is browser-only — load dynamically
+const GraphCanvas = dynamic(() => import('@/components/GraphCanvas'), {
+  ssr: false,
+  loading: () => (
+    <div
+      style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'var(--text-muted)',
+        fontSize: 13,
+      }}
+    >
+      Initializing graph engine…
+    </div>
+  ),
+});
+
+// ── Demo loader (for prototype demonstration without file dialog) ─────────
+function buildDemoState() {
+  const source1 = buildSource('FIR_2026_001.pdf', 1);
+  return {
+    nodes: DATASET_1_NODES,
+    edges: DATASET_1_EDGES,
+    sources: [source1],
+  };
+}
+
+const DEFAULT_FILTERS: Filters = {
+  minConfidence: 0,
+  riskLevels: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as RiskLevel[],
+  nodeTypes: ['PERSON', 'PHONE', 'VEHICLE', 'LOCATION', 'ORGANIZATION', 'ACCOUNT', 'DOCUMENT'] as NodeType[],
+  relationshipTypes: [],
+};
+
+export default function InvestigationDashboard() {
+  // ── App state ─────────────────────────────────────────────────────────────
+  const [appState, setAppState] = useState<AppState>('EMPTY');
+
+  // ── Data state ────────────────────────────────────────────────────────────
+  const [nodes, setNodes] = useState<NodeData[]>([]);
+  const [edges, setEdges] = useState<EdgeData[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
+  const [newNodeIds, setNewNodeIds] = useState<string[]>([]);
+  const [newEdgeIds, setNewEdgeIds] = useState<string[]>([]);
+
+  // ── UI state ──────────────────────────────────────────────────────────────
+  const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
+  const [selectedEdge, setSelectedEdge] = useState<EdgeData | null>(null);
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [searchFocusId, setSearchFocusId] = useState<string | null>(null);
+
+  // ── Processing modal ──────────────────────────────────────────────────────
+  const [processingFile, setProcessingFile] = useState<{ filename: string; isAdditional: boolean } | null>(null);
+  const pendingDataRef = useRef<{ nodes: NodeData[]; edges: EdgeData[]; source: Source; newNodeIds: string[]; newEdgeIds: string[] } | null>(null);
+
+  // ── Notification + Audit ──────────────────────────────────────────────────
+  const [showNewConnections, setShowNewConnections] = useState(false);
+  const [auditSource, setAuditSource] = useState<Source | null>(null);
+
+  // ── Graph ref ─────────────────────────────────────────────────────────────
+  const graphRef = useRef<any>(null);
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  const highRiskCount = nodes.filter((n) => n.risk === 'HIGH' || n.risk === 'CRITICAL').length;
+
+  // ── File upload handler ───────────────────────────────────────────────────
+  const handleFileUpload = useCallback(
+    (file: File) => {
+      const isFirst = sources.length === 0;
+      const { nodes: newNodes, edges: newEdges, isDataset2 } = resolveDataset(file.name, isFirst);
+
+      if (isFirst) {
+        // First upload: load dataset 1
+        const source = buildSource(file.name, 1);
+        pendingDataRef.current = {
+          nodes: newNodes,
+          edges: newEdges,
+          source,
+          newNodeIds: [],
+          newEdgeIds: [],
+        };
+        setProcessingFile({ filename: file.name, isAdditional: false });
+        setAppState('PROCESSING');
+      } else {
+        // Additional upload: merge with existing
+        const existingNodeIds = new Set(nodes.map((n) => n.id));
+        const existingEdgeIds = new Set(edges.map((e) => e.id));
+
+        const mergedNodes = [...nodes];
+        const addedNodeIds: string[] = [];
+
+        newNodes.forEach((n) => {
+          if (!existingNodeIds.has(n.id)) {
+            mergedNodes.push(n);
+            addedNodeIds.push(n.id);
+          }
+        });
+
+        const mergedEdges = [...edges];
+        const addedEdgeIds: string[] = [];
+
+        newEdges.forEach((e) => {
+          if (!existingEdgeIds.has(e.id)) {
+            mergedEdges.push(e);
+            addedEdgeIds.push(e.id);
+          }
+        });
+
+        const source = buildSource(file.name, 2);
+        pendingDataRef.current = {
+          nodes: mergedNodes,
+          edges: mergedEdges,
+          source,
+          newNodeIds: addedNodeIds,
+          newEdgeIds: addedEdgeIds,
+        };
+        setProcessingFile({ filename: file.name, isAdditional: true });
+        setAppState('REPROCESSING');
+      }
+    },
+    [sources, nodes, edges]
+  );
+
+  // ── Processing complete callback ──────────────────────────────────────────
+  const handleProcessingComplete = useCallback(() => {
+    const pending = pendingDataRef.current;
+    if (!pending) return;
+
+    setNodes(pending.nodes);
+    setEdges(pending.edges);
+    setSources((prev) => [...prev, pending.source]);
+    setNewNodeIds(pending.newNodeIds);
+    setNewEdgeIds(pending.newEdgeIds);
+
+    const isAdditional = pending.newNodeIds.length > 0 || pending.newEdgeIds.length > 0;
+
+    setProcessingFile(null);
+    pendingDataRef.current = null;
+
+    if (isAdditional) {
+      setAppState('GRAPH_UPDATED');
+      setShowNewConnections(true);
+    } else {
+      setAppState('GRAPH_ACTIVE');
+    }
+  }, []);
+
+  // ── Node expand (double-click) ────────────────────────────────────────────
+  const handleNodeExpand = useCallback(
+    (nodeId: string) => {
+      const expansion = EXPANDABLE_NEIGHBORS[nodeId];
+      if (!expansion) return;
+
+      const existingNodeIds = new Set(nodes.map((n) => n.id));
+      const existingEdgeIds = new Set(edges.map((e) => e.id));
+
+      const newN = expansion.nodes.filter((n) => !existingNodeIds.has(n.id));
+      const newE = expansion.edges.filter((e) => !existingEdgeIds.has(e.id));
+
+      if (newN.length === 0 && newE.length === 0) return;
+
+      setNodes((prev) => [...prev, ...newN]);
+      setEdges((prev) => [...prev, ...newE]);
+      setNewNodeIds(newN.map((n) => n.id));
+      setNewEdgeIds(newE.map((e) => e.id));
+    },
+    [nodes, edges]
+  );
+
+  // ── View new connections ──────────────────────────────────────────────────
+  const handleViewNewConnections = useCallback(() => {
+    setShowNewConnections(false);
+    // Highlight new nodes/edges in graph
+    graphRef.current?.highlightNew(newNodeIds, newEdgeIds);
+    // Focus graph to fit
+    graphRef.current?.fitGraph();
+  }, [newNodeIds, newEdgeIds]);
+
+  // ── Search ────────────────────────────────────────────────────────────────
+  const handleSearch = useCallback((query: string, nodeId: string | null) => {
+    setSearchFocusId(nodeId);
+  }, []);
+
+  // ── Graph controls ────────────────────────────────────────────────────────
+  const handleZoomIn = useCallback(() => graphRef.current?.zoomIn(), []);
+  const handleZoomOut = useCallback(() => graphRef.current?.zoomOut(), []);
+  const handleFit = useCallback(() => graphRef.current?.fitGraph(), []);
+  const handleReset = useCallback(() => graphRef.current?.resetView(), []);
+
+  // ── Demo loader ──────────────────────────────────────────────────────────
+  const loadDemo = useCallback(() => {
+    const { nodes: demoNodes, edges: demoEdges, sources: demoSources } = buildDemoState();
+    setNodes(demoNodes);
+    setEdges(demoEdges);
+    setSources(demoSources);
+    setNewNodeIds([]);
+    setNewEdgeIds([]);
+    setAppState('GRAPH_ACTIVE');
+  }, []);
+
+  const hasGraph = appState === 'GRAPH_ACTIVE' || appState === 'GRAPH_UPDATED';
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div
+      style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      <Header />
+
+      {/* ── Main layout ─────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          overflow: 'hidden',
+        }}
+      >
+        {/* ── Left Sidebar ──────────────────────────────────────────────────── */}
+        <div
+          style={{
+            width: 'var(--sidebar-width)',
+            flexShrink: 0,
+            borderRight: '1px solid var(--border)',
+            background: 'var(--surface-0)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0,
+            }}
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+            {/* Summary */}
+            <InvestigationSummary
+              entities={nodes.length}
+              relationships={edges.length}
+              highRisk={highRiskCount}
+              sources={sources.length}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+            <div className="divider" style={{ margin: '4px 0' }} />
+
+            {/* Sources */}
+            {hasGraph && (
+              <>
+                <SourcePanel
+                  sources={sources}
+                  onAddSource={handleFileUpload}
+                  onViewAudit={(s) => setAuditSource(s)}
+                />
+                <div className="divider" style={{ margin: '4px 0' }} />
+              </>
+            )}
+
+            {/* Graph controls */}
+            {hasGraph && (
+              <div style={{ paddingTop: 10 }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-muted)',
+                    marginBottom: 8,
+                    paddingLeft: 4,
+                  }}
+                >
+                  Graph Controls
+                </div>
+                <GraphControls
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  onZoomIn={handleZoomIn}
+                  onZoomOut={handleZoomOut}
+                  onFit={handleFit}
+                  onReset={handleReset}
+                  onSearch={handleSearch}
+                  availableNodes={nodes.map((n) => ({ id: n.id, name: n.name }))}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </main>
+
+        {/* ── Graph / Empty Area ────────────────────────────────────────────── */}
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            position: 'relative',
+            background: '#fafafa',
+          }}
+        >
+          {/* Empty state */}
+          {appState === 'EMPTY' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <EmptyState onUpload={handleFileUpload} />
+              {/* Demo shortcut for prototype demonstration */}
+              <div style={{ textAlign: 'center', paddingBottom: 20 }}>
+                <button
+                  onClick={loadDemo}
+                  style={{
+                    background: 'none',
+                    border: '1px dashed var(--border-strong)',
+                    borderRadius: 6,
+                    padding: '6px 16px',
+                    fontSize: 11,
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Load Demo Investigation
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Graph */}
+          {hasGraph && (
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+              <GraphCanvas
+                ref={graphRef}
+                nodes={nodes}
+                edges={edges}
+                newNodeIds={newNodeIds}
+                newEdgeIds={newEdgeIds}
+                filters={filters}
+                searchFocusId={searchFocusId}
+                onNodeSelect={(node) => {
+                  setSelectedNode(node);
+                  if (node) setSelectedEdge(null);
+                }}
+                onEdgeSelect={(edge) => {
+                  setSelectedEdge(edge);
+                  if (edge) setSelectedNode(null);
+                }}
+                onNodeExpand={handleNodeExpand}
+              />
+
+              {/* Graph Legend */}
+              <GraphLegend />
+
+              {/* New connections notification */}
+              {showNewConnections && (
+                <NewConnectionsNotification
+                  newEdgeCount={newEdgeIds.length}
+                  nodes={nodes}
+                  onViewConnections={handleViewNewConnections}
+                  onDismiss={() => setShowNewConnections(false)}
+                />
+              )}
+            </div>
+          )}
+
+          {/* First upload (before any graph exists) */}
+          {appState === 'PROCESSING' && !hasGraph && (
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--surface-0)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 13,
+                  color: 'var(--text-muted)',
+                }}
+              >
+                Processing…
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Right panel: Entity or Evidence ──────────────────────────────── */}
+        {selectedNode && (
+          <EntityPanel
+            node={selectedNode}
+            onClose={() => setSelectedNode(null)}
+            onExpandNetwork={handleNodeExpand}
+          />
+        )}
+        {selectedEdge && !selectedNode && (
+          <EvidencePanel
+            edge={selectedEdge}
+            nodes={nodes}
+            onClose={() => setSelectedEdge(null)}
+          />
+        )}
+      </div>
+
+      {/* ── Processing Modal (overlay) ───────────────────────────────────────── */}
+      {processingFile && (
+        <ProcessingModal
+          filename={processingFile.filename}
+          isAdditional={processingFile.isAdditional}
+          onComplete={handleProcessingComplete}
+        />
+      )}
+
+      {/* ── Audit Drawer ────────────────────────────────────────────────────── */}
+      {auditSource && (
+        <AuditDrawer source={auditSource} onClose={() => setAuditSource(null)} />
+      )}
+
+      {/* ── Chatbot ─────────────────────────────────────────────────────────── */}
+      <ChatbotWidget />
     </div>
   );
 }
