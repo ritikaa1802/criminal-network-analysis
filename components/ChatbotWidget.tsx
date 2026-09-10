@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { MessageSquare, ArrowRight, Send, ChevronDown, GripVertical } from 'lucide-react';
+import { MessageSquare, X, Send, ChevronDown, GripVertical } from 'lucide-react';
 
 const SUGGESTED = [
   'Explain this connection',
@@ -33,15 +33,16 @@ interface Message {
 interface Props {
   docked?: boolean;
   onClose?: () => void;
+  headerMode?: boolean;
 }
 
-export default function ChatbotWidget({ docked = false, onClose }: Props) {
+export default function ChatbotWidget({ docked = false, onClose, headerMode = false }: Props) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
       role: 'assistant',
-      text: 'AI Investigation Assistant is ready. Ask questions about this investigation or select a suggested query below.',
+      text: 'Connor is ready. Ask questions about this investigation or select a suggested query below.',
     },
   ]);
   const [input, setInput] = useState('');
@@ -63,6 +64,22 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
   };
 
   const visible = docked || open;
+
+  if (headerMode) {
+    return (
+      <div style={{ position: 'relative' }}>
+        <button className="header-action" onClick={() => setOpen((current) => !current)} title="Open Connor AI assistant">
+          <MessageSquare size={14} />
+          <span>Connor</span>
+        </button>
+        {open && (
+          <div style={{ position: 'fixed', top: 'calc(var(--header-height) - 1px)', right: 16, width: 340, height: 520, zIndex: 120, background: '#ffffff', border: '1px solid var(--panel-border)', boxShadow: 'var(--panel-shadow)' }}>
+            <ChatbotWidget docked onClose={() => setOpen(false)} />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -121,7 +138,7 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
               </div>
               <div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>
-                  AI Investigation Assistant
+                  Connor
                 </div>
                 <div style={{ fontSize: 10, color: '#64748b' }}>Ask about the active graph</div>
               </div>
@@ -136,7 +153,7 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
               }}
             >
               {docked && <GripVertical size={14} style={{ marginRight: 6, opacity: 0.6 }} />}
-              <ArrowRight size={14} />
+              <X size={14} />
             </button>
           </div>
 
@@ -286,7 +303,7 @@ export default function ChatbotWidget({ docked = false, onClose }: Props) {
         }}
         onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.transform = 'scale(1.08)')}
         onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.transform = 'scale(1)')}
-        title="AI Investigation Assistant"
+        title="Connor AI assistant"
       >
         {open ? (
           <ChevronDown size={18} color="white" />

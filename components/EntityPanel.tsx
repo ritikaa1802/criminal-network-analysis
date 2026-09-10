@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, User, Phone, Car, MapPin, Building2, CreditCard, FileText, ChevronRight, Maximize2 } from 'lucide-react';
+import { X, User, Phone, Car, MapPin, Building2, CreditCard, FileText, ChevronRight, Maximize2 } from 'lucide-react';
 import type { NodeData, NodeType } from '@/lib/types';
 import { NODE_COLORS } from '@/lib/graphConfig';
 
@@ -60,7 +60,7 @@ export default function EntityPanel({ node, onClose, onExpandNetwork }: Props) {
           Entity Intelligence
         </span>
         <button className="btn-icon" onClick={onClose} title="Back to graph">
-          <ArrowLeft size={14} />
+          <X size={14} />
         </button>
       </div>
 
@@ -296,7 +296,7 @@ export function EntityPeek({
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 6 }}>
             <strong style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</strong>
             <button className="btn-icon" onClick={onClose} title="Dismiss entity brief" style={{ width: 20, height: 20 }}>
-              <ArrowLeft size={12} />
+              <X size={12} />
             </button>
           </div>
           <div style={{ marginTop: 4, display: 'flex', gap: 5, flexWrap: 'wrap' }}>

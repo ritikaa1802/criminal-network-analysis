@@ -3,7 +3,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { ArrowLeft } from 'lucide-react';
+import { PanelLeft } from 'lucide-react';
 
 import Header from '@/components/Header';
 import InvestigationSummary from '@/components/InvestigationSummary';
@@ -15,7 +15,6 @@ import EntityPanel, { EntityPeek } from '@/components/EntityPanel';
 import EvidencePanel from '@/components/EvidencePanel';
 import NewConnectionsNotification from '@/components/NewConnectionsNotification';
 import AuditDrawer from '@/components/AuditDrawer';
-import ChatbotWidget from '@/components/ChatbotWidget';
 import GraphLegend from '@/components/GraphLegend';
 
 import {
@@ -328,7 +327,13 @@ export default function InvestigationDashboard() {
       }}
     >
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <Header onCreate={handleCreate} onSave={handleSave} onShare={handleShare} />
+      <Header
+        onCreate={handleCreate}
+        onSave={handleSave}
+        onShare={handleShare}
+        onToggleLeft={() => setLeftRailOpen((open) => !open)}
+        onToggleRight={() => setRightRailOpen((open) => !open)}
+      />
 
       {/* ── Main layout ─────────────────────────────────────────────────────── */}
       <div
@@ -353,7 +358,7 @@ export default function InvestigationDashboard() {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 0' }}>
             <span className="label-sm" style={{ color: 'var(--text-muted)' }}>Workspace</span>
-            <button className="btn-icon" onClick={() => setLeftRailOpen(false)} title="Hide left panel"><ArrowLeft size={14} /></button>
+            <button className="btn-icon" onClick={() => setLeftRailOpen(false)} title="Hide workspace sidebar"><PanelLeft size={14} /></button>
           </div>
           <div
             style={{
@@ -430,8 +435,6 @@ export default function InvestigationDashboard() {
             background: '#f8fafc',
           }}
         >
-          {!leftRailOpen && <button className="btn-secondary" style={{ position: 'absolute', top: 14, left: 14, zIndex: 20 }} onClick={() => setLeftRailOpen(true)}>Show workspace</button>}
-          {!rightRailOpen && <button className="btn-secondary" style={{ position: 'absolute', top: 14, right: 14, zIndex: 20 }} onClick={() => setRightRailOpen(true)}>Show AI chat</button>}
           {/* Empty state */}
           {appState === 'EMPTY' && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -535,10 +538,6 @@ export default function InvestigationDashboard() {
           )}
         </div>
 
-        {rightRailOpen && <div className="resize-handle" onPointerDown={() => setResizing('right')} />}
-        {rightRailOpen && <aside className="elevated-panel" style={{ width: rightWidth, flexShrink: 0, overflow: 'hidden', background: '#ffffff' }}>
-          <ChatbotWidget docked onClose={() => setRightRailOpen(false)} />
-        </aside>}
       </div>
 
       {/* ── Processing Modal (overlay) ───────────────────────────────────────── */}
@@ -555,12 +554,12 @@ export default function InvestigationDashboard() {
         <AuditDrawer source={auditSource} onClose={() => setAuditSource(null)} />
       )}
       {selectedNode && (
-        entityDetailOpen && <div style={{ position: 'fixed', top: 'var(--header-height)', right: rightRailOpen ? rightWidth + 6 : 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
+        entityDetailOpen && rightRailOpen && <div style={{ position: 'fixed', top: 'var(--header-height)', right: 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
           <EntityPanel node={selectedNode} onClose={() => setEntityDetailOpen(false)} onExpandNetwork={handleNodeExpand} />
         </div>
       )}
       {selectedEdge && !selectedNode && (
-        <div style={{ position: 'fixed', top: 'var(--header-height)', right: rightRailOpen ? rightWidth + 6 : 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
+        <div style={{ position: 'fixed', top: 'var(--header-height)', right: 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
           <EvidencePanel edge={selectedEdge} nodes={nodes} onClose={() => setSelectedEdge(null)} />
         </div>
       )}

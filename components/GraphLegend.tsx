@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { GripVertical, ArrowLeft } from 'lucide-react';
+import { GripVertical, X } from 'lucide-react';
 import { NODE_COLORS } from '@/lib/graphConfig';
 import type { NodeType } from '@/lib/types';
 
@@ -98,7 +98,7 @@ export default function GraphLegend({ onClose }: Props) {
         </span>
         {onClose && (
           <button className="btn-icon" onClick={onClose} title="Hide legend">
-            <ArrowLeft size={12} />
+            <X size={12} />
           </button>
         )}
       </div>

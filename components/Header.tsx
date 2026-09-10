@@ -1,14 +1,17 @@
 'use client';
 
-import { LinkIcon, Plus, Save, Share2 } from 'lucide-react';
+import { LinkIcon, Plus, Save, Share2, PanelLeft, PanelRight } from 'lucide-react';
+import ChatbotWidget from '@/components/ChatbotWidget';
 
 interface Props {
   onCreate: () => void;
   onSave: () => void;
   onShare: () => void;
+  onToggleLeft: () => void;
+  onToggleRight: () => void;
 }
 
-export default function Header({ onCreate, onSave, onShare }: Props) {
+export default function Header({ onCreate, onSave, onShare, onToggleLeft, onToggleRight }: Props) {
   return (
     <header
       style={{
@@ -80,6 +83,13 @@ export default function Header({ onCreate, onSave, onShare }: Props) {
 
       {/* Right: Workspace actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button className="header-action" onClick={onToggleLeft} title="Toggle workspace sidebar">
+          <PanelLeft size={14} />
+        </button>
+        <button className="header-action" onClick={onToggleRight} title="Toggle detail sidebar">
+          <PanelRight size={14} />
+        </button>
+        <ChatbotWidget headerMode />
         <button className="header-action" onClick={onCreate} title="Create a new investigation">
           <Plus size={14} />
           <span>Create</span>
