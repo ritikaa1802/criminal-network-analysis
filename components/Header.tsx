@@ -1,18 +1,15 @@
 'use client';
 
-import { LinkIcon, Plus, Save, Share2, PanelLeft, Files } from 'lucide-react';
+import { LinkIcon, Plus, Save, Share2 } from 'lucide-react';
 import ChatbotWidget from '@/components/ChatbotWidget';
 
 interface Props {
   onCreate: () => void;
   onSave: () => void;
   onShare: () => void;
-  onToggleWorkspace: () => void;
-  onOpenSource: () => void;
-  hasSources: boolean;
 }
 
-export default function Header({ onCreate, onSave, onShare, onToggleWorkspace, onOpenSource, hasSources }: Props) {
+export default function Header({ onCreate, onSave, onShare }: Props) {
   return (
     <header
       style={{
@@ -84,19 +81,11 @@ export default function Header({ onCreate, onSave, onShare, onToggleWorkspace, o
 
       {/* Right: Workspace actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button className="header-action header-action-dark" onClick={onToggleWorkspace} title="Toggle workspace sidebar">
-          <PanelLeft size={14} />
-          <span>Workspace</span>
-        </button>
-        <button className="header-action header-action-dark" onClick={onOpenSource} disabled={!hasSources} title="Open source audit">
-          <Files size={14} />
-          <span>Sources</span>
-        </button>
-        <ChatbotWidget headerMode />
         <button className="header-action header-action-blue" onClick={onCreate} title="Create a new investigation">
           <Plus size={14} />
           <span>Create</span>
         </button>
+        <ChatbotWidget headerMode />
         <button className="header-action header-action-dark" onClick={onSave} title="Save investigation locally">
           <Save size={14} />
           <span>Save</span>

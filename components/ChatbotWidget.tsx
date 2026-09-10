@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { MessageSquare, X, Send, ChevronDown, GripVertical } from 'lucide-react';
+import { Bot, MessageSquare, X, Send, ChevronDown, GripVertical } from 'lucide-react';
 
 const SUGGESTED = [
   'Explain this connection',
@@ -37,7 +37,7 @@ interface Props {
 }
 
 export default function ChatbotWidget({ docked = false, onClose, headerMode = false }: Props) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
@@ -69,7 +69,7 @@ export default function ChatbotWidget({ docked = false, onClose, headerMode = fa
     return (
       <div style={{ position: 'relative' }}>
         <button className="header-action" onClick={() => setOpen((current) => !current)} title="Open Connor AI assistant">
-          <MessageSquare size={14} />
+          <Bot size={14} />
           <span>Connor</span>
         </button>
         {open && (

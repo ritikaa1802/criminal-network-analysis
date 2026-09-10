@@ -18,9 +18,10 @@ interface Props {
   node: NodeData;
   onClose: () => void;
   onExpandNetwork: (nodeId: string) => void;
+  floating?: boolean;
 }
 
-export default function EntityPanel({ node, onClose, onExpandNetwork }: Props) {
+export default function EntityPanel({ node, onClose, onExpandNetwork, floating = false }: Props) {
   const color = NODE_COLORS[node.type];
 
   return (
@@ -28,13 +29,15 @@ export default function EntityPanel({ node, onClose, onExpandNetwork }: Props) {
       className="slide-in-right elevated-panel"
       style={{
         width: 'var(--panel-width)',
-        height: '100%',
+        height: floating ? 'auto' : '100%',
+        maxHeight: floating ? 'calc(100vh - 96px)' : undefined,
         background: 'var(--surface-0)',
         borderLeft: '1px solid var(--panel-border)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
         flexShrink: 0,
+        ...(floating ? { zIndex: 30, overflowY: 'auto' as const } : {}),
       }}
     >
       {/* Header */}

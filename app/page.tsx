@@ -331,9 +331,6 @@ export default function InvestigationDashboard() {
         onCreate={handleCreate}
         onSave={handleSave}
         onShare={handleShare}
-        onToggleWorkspace={() => setLeftRailOpen((open) => !open)}
-        onOpenSource={() => sources[0] && setAuditSource(sources[0])}
-        hasSources={sources.length > 0}
       />
 
       {/* ── Main layout ─────────────────────────────────────────────────────── */}
@@ -436,6 +433,15 @@ export default function InvestigationDashboard() {
             background: '#f8fafc',
           }}
         >
+          {!leftRailOpen && (
+            <button
+              className="sidebar-tab"
+              onClick={() => setLeftRailOpen(true)}
+              title="Open workspace sidebar"
+            >
+              <PanelLeft size={15} />
+            </button>
+          )}
           {/* Empty state */}
           {appState === 'EMPTY' && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -502,6 +508,17 @@ export default function InvestigationDashboard() {
                 </div>
               )}
 
+              {selectedNode && selectedNodePosition && entityDetailOpen && (
+                <div style={{ position: 'absolute', left: selectedNodePosition.x + 18, top: selectedNodePosition.y, transform: 'translateY(-50%)' }}>
+                  <EntityPanel
+                    node={selectedNode}
+                    floating
+                    onClose={() => setEntityDetailOpen(false)}
+                    onExpandNetwork={handleNodeExpand}
+                  />
+                </div>
+              )}
+
               {/* Graph Legend */}
               {legendOpen && <GraphLegend onClose={() => setLegendOpen(false)} />}
               {!legendOpen && <button className="btn-secondary" style={{ position: 'absolute', bottom: 16, left: 16, zIndex: 20 }} onClick={() => setLegendOpen(true)}>Show legend</button>}
@@ -555,11 +572,6 @@ export default function InvestigationDashboard() {
       {/* ── Audit Drawer ────────────────────────────────────────────────────── */}
       {auditSource && (
         <AuditDrawer source={auditSource} onClose={() => setAuditSource(null)} />
-      )}
-      {selectedNode && (
-        entityDetailOpen && <div style={{ position: 'fixed', top: 'var(--header-height)', right: 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
-          <EntityPanel node={selectedNode} onClose={() => setEntityDetailOpen(false)} onExpandNetwork={handleNodeExpand} />
-        </div>
       )}
       {selectedEdge && !selectedNode && (
         <div style={{ position: 'fixed', top: 'var(--header-height)', right: 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
