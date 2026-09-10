@@ -70,6 +70,17 @@ export function getCytoscapeStylesheet() {
       },
     },
 
+    {
+      selector: 'node.hover-wobble',
+      style: {
+        width: 94,
+        height: 94,
+        'border-width': 4,
+        angle: 1,
+        'z-index': 18,
+      },
+    },
+
     // ── Node types ─────────────────────────────────────────────────────────────
     ...Object.entries(NODE_COLORS).map(([type, color]) => ({
       selector: `node[type="${type}"]`,

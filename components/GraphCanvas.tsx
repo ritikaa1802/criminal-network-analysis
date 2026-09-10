@@ -128,10 +128,35 @@ const GraphCanvas = forwardRef<GraphCanvasRef, Props>((props, ref) => {
 
       cyRef.current = cy;
 
+      if (nodes.length > 0) {
+        cy.one('layoutstop', () => {
+          if (!cancelled && cy.elements().length > 0) {
+            cy.fit(cy.elements(), 50);
+          }
+        });
+      }
+
       // ── Hover: node ────────────────────────────────────────────────────────
       cy.on('mouseover', 'node', (evt: any) => {
         const node = evt.target;
         const nodeData = node.data();
+
+        if (!node.scratch('_wobbleRunning')) {
+          const origin = node.position();
+          const wobble = (x: number, complete?: () => void) => {
+            node.animate(
+              {
+                position: { x: origin.x + x, y: origin.y },
+              },
+              { duration: 85, easing: 'ease-in-out', complete }
+            );
+          };
+
+          node.scratch('_wobbleRunning', true);
+          node.scratch('_wobbleOrigin', origin);
+          node.addClass('hover-wobble');
+          wobble(3, () => wobble(-3, () => wobble(1.5, () => wobble(0))));
+        }
 
         // Dim everything except neighbors
         cy.elements().addClass('dimmed');
@@ -154,7 +179,18 @@ const GraphCanvas = forwardRef<GraphCanvasRef, Props>((props, ref) => {
         container.style.cursor = 'pointer';
       });
 
-      cy.on('mouseout', 'node', () => {
+      cy.on('mouseout', 'node', (evt: any) => {
+        const node = evt.target;
+        const origin = node.scratch('_wobbleOrigin');
+        node.stop();
+        if (origin) {
+          node.animate(
+            { position: origin },
+            { duration: 100, easing: 'ease-out' }
+          );
+        }
+        node.removeClass('hover-wobble');
+        node.scratch('_wobbleRunning', false);
         cy.elements().removeClass('dimmed highlighted');
         setTooltip((t) => ({ ...t, visible: false }));
         if (containerRef.current) containerRef.current.style.cursor = 'default';

@@ -97,6 +97,7 @@ export default function InvestigationDashboard() {
   const [rightWidth, setRightWidth] = useState(340);
   const [resizing, setResizing] = useState<'left' | 'right' | null>(null);
   const [actionMessage, setActionMessage] = useState('');
+  const graphAreaRef = useRef<HTMLDivElement>(null);
 
   // ── Graph ref ─────────────────────────────────────────────────────────────
   const graphRef = useRef<any>(null);
@@ -469,7 +470,7 @@ export default function InvestigationDashboard() {
 
           {/* Graph */}
           {hasGraph && (
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+            <div ref={graphAreaRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
               <GraphCanvas
                 ref={graphRef}
                 nodes={nodes}
@@ -480,7 +481,16 @@ export default function InvestigationDashboard() {
                 searchFocusId={searchFocusId}
                 onNodeSelect={(node, position) => {
                   setSelectedNode(node);
-                  setSelectedNodePosition(position ?? null);
+                  if (position && graphAreaRef.current) {
+                    const bounds = graphAreaRef.current.getBoundingClientRect();
+                    const panelWidth = 360;
+                    const panelHeight = Math.min(bounds.height - 24, 620);
+                    const panelX = Math.min(Math.max(12, position.x + 18), Math.max(12, bounds.width - panelWidth - 12));
+                    const panelY = Math.min(Math.max(panelHeight / 2 + 12, position.y), Math.max(panelHeight / 2 + 12, bounds.height - panelHeight / 2 - 12));
+                    setSelectedNodePosition({ x: panelX, y: panelY });
+                  } else {
+                    setSelectedNodePosition(position ?? null);
+                  }
                   setEntityDetailOpen(false);
                   if (node) setSelectedEdge(null);
                 }}
@@ -509,7 +519,7 @@ export default function InvestigationDashboard() {
               )}
 
               {selectedNode && selectedNodePosition && entityDetailOpen && (
-                <div style={{ position: 'absolute', left: selectedNodePosition.x + 18, top: selectedNodePosition.y, transform: 'translateY(-50%)' }}>
+                <div style={{ position: 'absolute', left: selectedNodePosition.x, top: selectedNodePosition.y, transform: 'translateY(-50%)' }}>
                   <EntityPanel
                     node={selectedNode}
                     floating

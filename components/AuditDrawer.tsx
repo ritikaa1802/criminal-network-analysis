@@ -1,6 +1,6 @@
 'use client';
 
-import { PanelLeft, Hash, Clock, CheckCircle2 } from 'lucide-react';
+import { X, Hash, Clock, CheckCircle2 } from 'lucide-react';
 import type { Source } from '@/lib/types';
 
 interface Props {
@@ -69,7 +69,7 @@ export default function AuditDrawer({ source, onClose }: Props) {
             </div>
           </div>
           <button className="btn-icon" onClick={onClose} title="Close source audit">
-            <PanelLeft size={14} />
+            <X size={14} />
           </button>
         </div>
 

@@ -68,9 +68,8 @@ export default function ChatbotWidget({ docked = false, onClose, headerMode = fa
   if (headerMode) {
     return (
       <div style={{ position: 'relative' }}>
-        <button className="header-action" onClick={() => setOpen((current) => !current)} title="Open Connor AI assistant">
+        <button className="header-action" onClick={() => setOpen((current) => !current)} title="Open Connor AI assistant" aria-label="Open Connor AI assistant">
           <Bot size={14} />
-          <span>Connor</span>
         </button>
         {open && (
           <div style={{ position: 'fixed', top: 'var(--header-height)', right: 0, bottom: 0, width: 360, zIndex: 120, background: '#ffffff', border: '1px solid var(--panel-border)', boxShadow: 'var(--panel-shadow)' }}>
@@ -138,7 +137,7 @@ export default function ChatbotWidget({ docked = false, onClose, headerMode = fa
               </div>
               <div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>
-                  Connor
+                  Connor AI
                 </div>
                 <div style={{ fontSize: 10, color: '#64748b' }}>Ask about the active graph</div>
               </div>
