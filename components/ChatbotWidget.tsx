@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { MessageSquare, X, Send, ChevronDown, ChevronUp } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { MessageSquare, X, Send, ChevronDown, GripVertical } from 'lucide-react';
 
 const SUGGESTED = [
   'Explain this connection',
@@ -30,7 +30,12 @@ interface Message {
   text: string;
 }
 
-export default function ChatbotWidget() {
+interface Props {
+  docked?: boolean;
+  onClose?: () => void;
+}
+
+export default function ChatbotWidget({ docked = false, onClose }: Props) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -40,15 +45,16 @@ export default function ChatbotWidget() {
     },
   ]);
   const [input, setInput] = useState('');
+  const messageIdRef = useRef(0);
 
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', text };
+    const userMsg: Message = { id: `message-${messageIdRef.current++}`, role: 'user', text };
     const response =
       MOCK_RESPONSES[text] ||
       `Analysis of "${text}" is being processed. This feature will connect to the investigation AI engine in production. The graph currently shows ${11} entities and 14 relationships.`;
     const aiMsg: Message = {
-      id: (Date.now() + 1).toString(),
+      id: `message-${messageIdRef.current++}`,
       role: 'assistant',
       text: response,
     };
@@ -56,29 +62,34 @@ export default function ChatbotWidget() {
     setInput('');
   };
 
+  const visible = docked || open;
+
   return (
     <div
       style={{
-        position: 'fixed',
-        bottom: 20,
-        right: 20,
-        zIndex: 60,
+        position: docked ? 'static' : 'fixed',
+        bottom: docked ? undefined : 20,
+        right: docked ? undefined : 20,
+        zIndex: docked ? undefined : 60,
+        width: docked ? '100%' : undefined,
+        height: docked ? '100%' : undefined,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-end',
-        gap: 10,
+        alignItems: docked ? 'stretch' : 'flex-end',
+        gap: docked ? 0 : 10,
       }}
     >
       {/* Chat window */}
-      {open && (
+      {visible && (
         <div
-          className="fade-in"
+          className="fade-in elevated-panel"
           style={{
-            width: 320,
+            width: docked ? '100%' : 320,
+            height: docked ? '100%' : undefined,
             background: 'var(--surface-0)',
-            border: '1px solid var(--border)',
-            borderRadius: 12,
-            boxShadow: '0 8px 40px rgba(0,0,0,0.14)',
+            border: '1px solid var(--panel-border)',
+            borderRadius: docked ? 0 : 12,
+            boxShadow: docked ? 'none' : '0 8px 40px rgba(0,0,0,0.14)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
@@ -112,11 +123,11 @@ export default function ChatbotWidget() {
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#f9fafb' }}>
                   AI Investigation Assistant
                 </div>
-                <div style={{ fontSize: 10, color: '#6b7280' }}>Placeholder · Production pending</div>
+                <div style={{ fontSize: 10, color: '#6b7280' }}>Ask about the active graph</div>
               </div>
             </div>
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => (onClose ? onClose() : setOpen(false))}
               style={{
                 background: 'none',
                 border: 'none',
@@ -124,6 +135,7 @@ export default function ChatbotWidget() {
                 color: '#6b7280',
               }}
             >
+              {docked && <GripVertical size={14} style={{ marginRight: 6, opacity: 0.6 }} />}
               <X size={14} />
             </button>
           </div>
@@ -131,7 +143,8 @@ export default function ChatbotWidget() {
           {/* Messages */}
           <div
             style={{
-              height: 240,
+              flex: 1,
+              minHeight: docked ? 0 : 240,
               overflowY: 'auto',
               padding: '12px 14px',
               display: 'flex',
@@ -257,7 +270,7 @@ export default function ChatbotWidget() {
       )}
 
       {/* Toggle button */}
-      <button
+      {!docked && <button
         onClick={() => setOpen((o) => !o)}
         style={{
           width: 44,
@@ -281,7 +294,7 @@ export default function ChatbotWidget() {
         ) : (
           <MessageSquare size={18} color="white" />
         )}
-      </button>
+      </button>}
     </div>
   );
 }

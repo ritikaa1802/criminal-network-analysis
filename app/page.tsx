@@ -1,7 +1,7 @@
 'use client';
 // @ts-nocheck
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 import Header from '@/components/Header';
@@ -88,12 +88,73 @@ export default function InvestigationDashboard() {
   // ── Notification + Audit ──────────────────────────────────────────────────
   const [showNewConnections, setShowNewConnections] = useState(false);
   const [auditSource, setAuditSource] = useState<Source | null>(null);
+  const [leftRailOpen, setLeftRailOpen] = useState(true);
+  const [rightRailOpen, setRightRailOpen] = useState(true);
+  const [legendOpen, setLegendOpen] = useState(true);
+  const [leftWidth, setLeftWidth] = useState(272);
+  const [rightWidth, setRightWidth] = useState(340);
+  const [resizing, setResizing] = useState<'left' | 'right' | null>(null);
+  const [actionMessage, setActionMessage] = useState('');
 
   // ── Graph ref ─────────────────────────────────────────────────────────────
   const graphRef = useRef<any>(null);
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const highRiskCount = nodes.filter((n) => n.risk === 'HIGH' || n.risk === 'CRITICAL').length;
+
+  useEffect(() => {
+    if (!resizing) return;
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (resizing === 'left') {
+        setLeftWidth(Math.min(420, Math.max(220, event.clientX)));
+      } else {
+        setRightWidth(Math.min(480, Math.max(280, window.innerWidth - event.clientX)));
+      }
+    };
+    const handlePointerUp = () => setResizing(null);
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [resizing]);
+
+  const handleCreate = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const handleSave = useCallback(() => {
+    window.localStorage.setItem(
+      'crimson-investigation',
+      JSON.stringify({ nodes, edges, sources, savedAt: new Date().toISOString() })
+    );
+    setActionMessage('Investigation saved locally');
+    window.setTimeout(() => setActionMessage(''), 2400);
+  }, [nodes, edges, sources]);
+
+  const handleShare = useCallback(async () => {
+    const shareData = {
+      title: 'Crimson Investigation',
+      text: `Crimson investigation with ${nodes.length} entities and ${edges.length} relationships.`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        setActionMessage('Share link copied to clipboard');
+        window.setTimeout(() => setActionMessage(''), 2400);
+      }
+    } catch {
+      setActionMessage('Share cancelled');
+      window.setTimeout(() => setActionMessage(''), 2400);
+    }
+  }, [nodes.length, edges.length]);
 
   // ── File upload handler ───────────────────────────────────────────────────
   const handleFileUpload = useCallback(
@@ -242,7 +303,7 @@ export default function InvestigationDashboard() {
       }}
     >
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <Header />
+      <Header onCreate={handleCreate} onSave={handleSave} onShare={handleShare} />
 
       {/* ── Main layout ─────────────────────────────────────────────────────── */}
       <div
@@ -253,17 +314,22 @@ export default function InvestigationDashboard() {
         }}
       >
         {/* ── Left Sidebar ──────────────────────────────────────────────────── */}
-        <div
+        {leftRailOpen && <div
           style={{
-            width: 'var(--sidebar-width)',
+            width: leftWidth,
             flexShrink: 0,
-            borderRight: '1px solid var(--border)',
-            background: 'var(--surface-0)',
+            borderRight: '1px solid var(--panel-border)',
+            background: '#ffffff',
+            boxShadow: 'var(--panel-shadow)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
           }}
         >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 0' }}>
+            <span className="label-sm" style={{ color: 'var(--text-muted)' }}>Workspace</span>
+            <button className="btn-icon" onClick={() => setLeftRailOpen(false)} title="Hide left panel">×</button>
+          </div>
           <div
             style={{
               flex: 1,
@@ -325,7 +391,8 @@ export default function InvestigationDashboard() {
               </div>
             )}
           </div>
-        </div>
+        </div>}
+        {leftRailOpen && <div className="resize-handle" onPointerDown={() => setResizing('left')} />}
 
         {/* ── Graph / Empty Area ────────────────────────────────────────────── */}
         <div
@@ -338,6 +405,8 @@ export default function InvestigationDashboard() {
             background: '#fafafa',
           }}
         >
+          {!leftRailOpen && <button className="btn-secondary" style={{ position: 'absolute', top: 14, left: 14, zIndex: 20 }} onClick={() => setLeftRailOpen(true)}>Show workspace</button>}
+          {!rightRailOpen && <button className="btn-secondary" style={{ position: 'absolute', top: 14, right: 14, zIndex: 20 }} onClick={() => setRightRailOpen(true)}>Show AI chat</button>}
           {/* Empty state */}
           {appState === 'EMPTY' && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -386,7 +455,8 @@ export default function InvestigationDashboard() {
               />
 
               {/* Graph Legend */}
-              <GraphLegend />
+              {legendOpen && <GraphLegend onClose={() => setLegendOpen(false)} />}
+              {!legendOpen && <button className="btn-secondary" style={{ position: 'absolute', bottom: 16, left: 16, zIndex: 20 }} onClick={() => setLegendOpen(true)}>Show legend</button>}
 
               {/* New connections notification */}
               {showNewConnections && (
@@ -423,21 +493,10 @@ export default function InvestigationDashboard() {
           )}
         </div>
 
-        {/* ── Right panel: Entity or Evidence ──────────────────────────────── */}
-        {selectedNode && (
-          <EntityPanel
-            node={selectedNode}
-            onClose={() => setSelectedNode(null)}
-            onExpandNetwork={handleNodeExpand}
-          />
-        )}
-        {selectedEdge && !selectedNode && (
-          <EvidencePanel
-            edge={selectedEdge}
-            nodes={nodes}
-            onClose={() => setSelectedEdge(null)}
-          />
-        )}
+        {rightRailOpen && <div className="resize-handle" onPointerDown={() => setResizing('right')} />}
+        {rightRailOpen && <aside className="elevated-panel" style={{ width: rightWidth, flexShrink: 0, overflow: 'hidden', background: '#ffffff' }}>
+          <ChatbotWidget docked onClose={() => setRightRailOpen(false)} />
+        </aside>}
       </div>
 
       {/* ── Processing Modal (overlay) ───────────────────────────────────────── */}
@@ -453,9 +512,17 @@ export default function InvestigationDashboard() {
       {auditSource && (
         <AuditDrawer source={auditSource} onClose={() => setAuditSource(null)} />
       )}
-
-      {/* ── Chatbot ─────────────────────────────────────────────────────────── */}
-      <ChatbotWidget />
+      {selectedNode && (
+        <div style={{ position: 'fixed', top: 'var(--header-height)', right: rightRailOpen ? rightWidth + 6 : 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
+          <EntityPanel node={selectedNode} onClose={() => setSelectedNode(null)} onExpandNetwork={handleNodeExpand} />
+        </div>
+      )}
+      {selectedEdge && !selectedNode && (
+        <div style={{ position: 'fixed', top: 'var(--header-height)', right: rightRailOpen ? rightWidth + 6 : 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
+          <EvidencePanel edge={selectedEdge} nodes={nodes} onClose={() => setSelectedEdge(null)} />
+        </div>
+      )}
+      {actionMessage && <div className="fade-in" style={{ position: 'fixed', bottom: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 120, padding: '9px 14px', borderRadius: 6, background: 'var(--text-primary)', color: 'white', fontSize: 12 }}>{actionMessage}</div>}
     </div>
   );
 }

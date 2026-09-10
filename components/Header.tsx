@@ -1,8 +1,14 @@
 'use client';
 
-import { Shield, Lock, LinkIcon, FileCheck } from 'lucide-react';
+import { LinkIcon, Plus, Save, Share2 } from 'lucide-react';
 
-export default function Header() {
+interface Props {
+  onCreate: () => void;
+  onSave: () => void;
+  onShare: () => void;
+}
+
+export default function Header({ onCreate, onSave, onShare }: Props) {
   return (
     <header
       style={{
@@ -72,40 +78,21 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Right: Security indicators */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <StatusBadge icon={<Shield size={11} />} label="Secure Environment" />
-        <StatusBadge icon={<Lock size={11} />} label="Data Anonymized" />
-        <StatusBadge icon={<FileCheck size={11} />} label="Chain of Custody Verified" />
+      {/* Right: Workspace actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button className="header-action" onClick={onCreate} title="Create a new investigation">
+          <Plus size={14} />
+          <span>Create</span>
+        </button>
+        <button className="header-action" onClick={onSave} title="Save investigation locally">
+          <Save size={14} />
+          <span>Save</span>
+        </button>
+        <button className="header-action header-action-primary" onClick={onShare} title="Share investigation">
+          <Share2 size={14} />
+          <span>Share</span>
+        </button>
       </div>
     </header>
-  );
-}
-
-function StatusBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 5,
-        fontSize: 11,
-        color: '#6b7280',
-        fontWeight: 500,
-      }}
-    >
-      <span
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          background: '#22c55e',
-          display: 'inline-block',
-          boxShadow: '0 0 0 2px rgba(34,197,94,0.2)',
-        }}
-      />
-      <span style={{ color: '#9ca3af' }}>{icon}</span>
-      <span style={{ color: '#6b7280', whiteSpace: 'nowrap' }}>{label}</span>
-    </div>
   );
 }

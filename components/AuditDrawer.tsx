@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Hash, Clock, CheckCircle2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Hash, Clock, CheckCircle2 } from 'lucide-react';
 import type { Source } from '@/lib/types';
 
 interface Props {
@@ -26,19 +26,19 @@ export default function AuditDrawer({ source, onClose }: Props) {
 
       {/* Drawer */}
       <div
-        className="slide-in-right"
+        className="slide-in-left elevated-panel"
         style={{
           position: 'fixed',
           top: 0,
-          right: 0,
+          left: 0,
           bottom: 0,
           width: 360,
-          background: 'var(--surface-0)',
-          borderLeft: '1px solid var(--border)',
+          background: '#ffffff',
+          borderRight: '1px solid var(--panel-border)',
           zIndex: 90,
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '-8px 0 40px rgba(0,0,0,0.1)',
+          boxShadow: 'var(--panel-shadow)',
         }}
       >
         {/* Header */}
@@ -68,8 +68,8 @@ export default function AuditDrawer({ source, onClose }: Props) {
               {source.filename}
             </div>
           </div>
-          <button className="btn-icon" onClick={onClose}>
-            <X size={13} />
+          <button className="btn-icon" onClick={onClose} title="Close chain of custody">
+            <ArrowLeft size={14} />
           </button>
         </div>
 

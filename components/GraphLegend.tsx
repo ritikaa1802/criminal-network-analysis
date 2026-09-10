@@ -1,6 +1,8 @@
 'use client';
 
-import { NODE_COLORS, NODE_SHAPES } from '@/lib/graphConfig';
+import { useState } from 'react';
+import { GripVertical, X } from 'lucide-react';
+import { NODE_COLORS } from '@/lib/graphConfig';
 import type { NodeType } from '@/lib/types';
 
 const SHAPE_ICONS: Record<NodeType, string> = {
@@ -30,13 +32,42 @@ const NODE_TYPES: NodeType[] = [
   'DOCUMENT',
 ];
 
-export default function GraphLegend() {
+interface Props {
+  onClose?: () => void;
+}
+
+export default function GraphLegend({ onClose }: Props) {
+  const [position, setPosition] = useState({ x: 16, y: 16 });
+
+  const handleDragStart = (event: React.PointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest('button')) return;
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const initial = position;
+
+    const handleMove = (moveEvent: PointerEvent) => {
+      setPosition({
+        x: Math.max(8, initial.x + moveEvent.clientX - startX),
+        y: Math.max(8, initial.y - moveEvent.clientY + startY),
+      });
+    };
+    const handleEnd = () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', handleEnd);
+    };
+
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', handleEnd);
+  };
+
   return (
     <div
+      onPointerDown={handleDragStart}
       style={{
         position: 'absolute',
-        bottom: 16,
-        left: 16,
+        bottom: position.y,
+        left: position.x,
         background: 'rgba(255,255,255,0.95)',
         border: '1px solid var(--border)',
         borderRadius: 8,
@@ -44,11 +75,15 @@ export default function GraphLegend() {
         zIndex: 10,
         boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
         minWidth: 160,
+        cursor: 'grab',
         backdropFilter: 'blur(8px)',
       }}
     >
       <div
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           fontSize: 9,
           fontWeight: 700,
           letterSpacing: '0.1em',
@@ -57,7 +92,15 @@ export default function GraphLegend() {
           marginBottom: 8,
         }}
       >
-        Legend
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <GripVertical size={12} />
+          Legend
+        </span>
+        {onClose && (
+          <button className="btn-icon" onClick={onClose} title="Hide legend">
+            <X size={12} />
+          </button>
+        )}
       </div>
 
       {/* Entity Types */}

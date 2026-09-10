@@ -15,12 +15,12 @@ export default function EvidencePanel({ edge, nodes, onClose }: Props) {
 
   return (
     <div
-      className="slide-in-right"
+      className="slide-in-right elevated-panel"
       style={{
         width: 'var(--panel-width)',
         height: '100%',
         background: 'var(--surface-0)',
-        borderLeft: '1px solid var(--border)',
+        borderLeft: '1px solid var(--panel-border)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
