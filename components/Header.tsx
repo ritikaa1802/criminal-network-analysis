@@ -90,15 +90,15 @@ export default function Header({ onCreate, onSave, onShare, onToggleLeft, onTogg
           <PanelRight size={14} />
         </button>
         <ChatbotWidget headerMode />
-        <button className="header-action" onClick={onCreate} title="Create a new investigation">
+        <button className="header-action header-action-blue" onClick={onCreate} title="Create a new investigation">
           <Plus size={14} />
           <span>Create</span>
         </button>
-        <button className="header-action" onClick={onSave} title="Save investigation locally">
+        <button className="header-action header-action-dark" onClick={onSave} title="Save investigation locally">
           <Save size={14} />
           <span>Save</span>
         </button>
-        <button className="header-action header-action-primary" onClick={onShare} title="Share investigation">
+        <button className="header-action header-action-dark" onClick={onShare} title="Share investigation">
           <Share2 size={14} />
           <span>Share</span>
         </button>

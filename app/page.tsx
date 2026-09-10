@@ -11,7 +11,7 @@ import EmptyState from '@/components/EmptyState';
 import SourcePanel from '@/components/SourcePanel';
 import ProcessingModal from '@/components/ProcessingModal';
 import GraphControls from '@/components/GraphControls';
-import EntityPanel, { EntityPeek } from '@/components/EntityPanel';
+import EntityPanel from '@/components/EntityPanel';
 import EvidencePanel from '@/components/EvidencePanel';
 import NewConnectionsNotification from '@/components/NewConnectionsNotification';
 import AuditDrawer from '@/components/AuditDrawer';
@@ -474,7 +474,7 @@ export default function InvestigationDashboard() {
                 onNodeSelect={(node, position) => {
                   setSelectedNode(node);
                   setSelectedNodePosition(position ?? null);
-                  setEntityDetailOpen(false);
+                  setEntityDetailOpen(Boolean(node));
                   if (node) setSelectedEdge(null);
                 }}
                 onEdgeSelect={(edge) => {
@@ -485,19 +485,6 @@ export default function InvestigationDashboard() {
                 }}
                 onNodeExpand={handleNodeExpand}
               />
-
-              {selectedNode && selectedNodePosition && !entityDetailOpen && (
-                <div style={{ position: 'absolute', left: selectedNodePosition.x, top: selectedNodePosition.y, zIndex: 24 }}>
-                  <EntityPeek
-                    node={selectedNode}
-                    onBrief={() => setEntityDetailOpen(true)}
-                    onClose={() => {
-                      setSelectedNode(null);
-                      setSelectedNodePosition(null);
-                    }}
-                  />
-                </div>
-              )}
 
               {/* Graph Legend */}
               {legendOpen && <GraphLegend onClose={() => setLegendOpen(false)} />}
@@ -554,7 +541,7 @@ export default function InvestigationDashboard() {
         <AuditDrawer source={auditSource} onClose={() => setAuditSource(null)} />
       )}
       {selectedNode && (
-        entityDetailOpen && rightRailOpen && <div style={{ position: 'fixed', top: 'var(--header-height)', right: 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
+        entityDetailOpen && <div style={{ position: 'fixed', top: 'var(--header-height)', right: 6, bottom: 0, zIndex: 30, width: 'var(--panel-width)', boxShadow: '-8px 0 24px rgba(0,0,0,0.12)' }}>
           <EntityPanel node={selectedNode} onClose={() => setEntityDetailOpen(false)} onExpandNetwork={handleNodeExpand} />
         </div>
       )}

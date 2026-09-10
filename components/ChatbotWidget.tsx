@@ -73,7 +73,7 @@ export default function ChatbotWidget({ docked = false, onClose, headerMode = fa
           <span>Connor</span>
         </button>
         {open && (
-          <div style={{ position: 'fixed', top: 'calc(var(--header-height) - 1px)', right: 16, width: 340, height: 520, zIndex: 120, background: '#ffffff', border: '1px solid var(--panel-border)', boxShadow: 'var(--panel-shadow)' }}>
+          <div style={{ position: 'fixed', top: 'var(--header-height)', right: 0, bottom: 0, width: 360, zIndex: 120, background: '#ffffff', border: '1px solid var(--panel-border)', boxShadow: 'var(--panel-shadow)' }}>
             <ChatbotWidget docked onClose={() => setOpen(false)} />
           </div>
         )}

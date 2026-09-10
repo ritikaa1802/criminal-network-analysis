@@ -287,8 +287,10 @@ main {
   cursor: pointer;
 }
 .header-action:hover { background: #1f2937; color: white; }
-.header-action-primary { background: #2563eb; border-color: #2563eb; color: white; }
-.header-action-primary:hover { background: #1e3a8a; }
+.header-action-blue { background: #2563eb; border-color: #2563eb; color: white; }
+.header-action-blue:hover { background: #1e3a8a; border-color: #1e3a8a; }
+.header-action-dark { background: #0f172a; border-color: #334155; color: white; }
+.header-action-dark:hover { background: #1e3a8a; border-color: #1e3a8a; }
 
 .resize-handle {
   width: 6px;
