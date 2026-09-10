@@ -288,6 +288,9 @@ export function EntityPeek({
         zIndex: 25,
       }}
     >
+      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 8 }}>
+        Entity Intelligence
+      </div>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
         <div style={{ width: 28, height: 28, borderRadius: 7, display: 'grid', placeItems: 'center', background: color, color: '#ffffff', flexShrink: 0 }}>
           {TYPE_ICONS[node.type]}
@@ -310,7 +313,7 @@ export function EntityPeek({
         <span>Links <strong style={{ color: 'var(--text-primary)' }}>{node.connectionCount ?? 0}</strong></span>
       </div>
       <button className="btn-secondary" onClick={onBrief} style={{ width: '100%', justifyContent: 'center', padding: '6px 10px', fontSize: 11 }}>
-        Brief
+        Open full brief
       </button>
     </div>
   );

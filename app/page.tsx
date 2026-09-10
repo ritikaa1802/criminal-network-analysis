@@ -3,7 +3,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { PanelLeft } from 'lucide-react';
+import { PanelLeft, X } from 'lucide-react';
 
 import Header from '@/components/Header';
 import InvestigationSummary from '@/components/InvestigationSummary';
@@ -11,7 +11,7 @@ import EmptyState from '@/components/EmptyState';
 import SourcePanel from '@/components/SourcePanel';
 import ProcessingModal from '@/components/ProcessingModal';
 import GraphControls from '@/components/GraphControls';
-import EntityPanel from '@/components/EntityPanel';
+import EntityPanel, { EntityPeek } from '@/components/EntityPanel';
 import EvidencePanel from '@/components/EvidencePanel';
 import NewConnectionsNotification from '@/components/NewConnectionsNotification';
 import AuditDrawer from '@/components/AuditDrawer';
@@ -331,8 +331,9 @@ export default function InvestigationDashboard() {
         onCreate={handleCreate}
         onSave={handleSave}
         onShare={handleShare}
-        onToggleLeft={() => setLeftRailOpen((open) => !open)}
-        onToggleRight={() => setRightRailOpen((open) => !open)}
+        onToggleWorkspace={() => setLeftRailOpen((open) => !open)}
+        onOpenSource={() => sources[0] && setAuditSource(sources[0])}
+        hasSources={sources.length > 0}
       />
 
       {/* ── Main layout ─────────────────────────────────────────────────────── */}
@@ -474,17 +475,32 @@ export default function InvestigationDashboard() {
                 onNodeSelect={(node, position) => {
                   setSelectedNode(node);
                   setSelectedNodePosition(position ?? null);
-                  setEntityDetailOpen(Boolean(node));
+                  setEntityDetailOpen(false);
                   if (node) setSelectedEdge(null);
                 }}
                 onEdgeSelect={(edge) => {
                   setSelectedEdge(edge);
-                  setSelectedNodePosition(null);
-                  setEntityDetailOpen(false);
-                  if (edge) setSelectedNode(null);
+                  if (edge) {
+                    setSelectedNode(null);
+                    setSelectedNodePosition(null);
+                    setEntityDetailOpen(false);
+                  }
                 }}
                 onNodeExpand={handleNodeExpand}
               />
+
+              {selectedNode && selectedNodePosition && !entityDetailOpen && (
+                <div style={{ position: 'absolute', left: selectedNodePosition.x, top: selectedNodePosition.y, zIndex: 24 }}>
+                  <EntityPeek
+                    node={selectedNode}
+                    onBrief={() => setEntityDetailOpen(true)}
+                    onClose={() => {
+                      setSelectedNode(null);
+                      setSelectedNodePosition(null);
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Graph Legend */}
               {legendOpen && <GraphLegend onClose={() => setLegendOpen(false)} />}
