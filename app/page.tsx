@@ -16,6 +16,9 @@ import EvidencePanel from '@/components/EvidencePanel';
 import NewConnectionsNotification from '@/components/NewConnectionsNotification';
 import AuditDrawer from '@/components/AuditDrawer';
 import GraphLegend from '@/components/GraphLegend';
+import StickyNoteOverlay from '@/components/StickyNoteOverlay';
+import type { StickyNoteData } from '@/components/StickyNoteOverlay';
+import StickyNoteEditor from '@/components/StickyNoteEditor';
 
 import {
   DATASET_1_NODES,
@@ -27,13 +30,6 @@ import {
   resolveDataset,
 } from '@/lib/mockData';
 import type { NodeData, EdgeData, Source, Filters, AppState, RiskLevel, NodeType } from '@/lib/types';
-
-interface InvestigationNote {
-  id: string;
-  nodeId: string;
-  text: string;
-  color: 'yellow' | 'pink' | 'blue' | 'green';
-}
 
 // GraphCanvas uses Cytoscape which is browser-only — load dynamically
 const GraphCanvas = dynamic(() => import('@/components/GraphCanvas'), {
@@ -106,7 +102,8 @@ export default function InvestigationDashboard() {
   const [resizing, setResizing] = useState<'left' | 'right' | null>(null);
   const [actionMessage, setActionMessage] = useState('');
   const [connorOpen, setConnorOpen] = useState(true);
-  const [stickyNotes, setStickyNotes] = useState<InvestigationNote[]>([]);
+  const [stickyNotes, setStickyNotes] = useState<StickyNoteData[]>([]);
+  const [stickyEditorTarget, setStickyEditorTarget] = useState<{ entityId: string; entityName: string } | null>(null);
   const graphAreaRef = useRef<HTMLDivElement>(null);
 
   // ── Graph ref ─────────────────────────────────────────────────────────────
@@ -172,10 +169,43 @@ export default function InvestigationDashboard() {
     window.location.reload();
   }, []);
 
-  const persistStickyNotes = (nextNotes: InvestigationNote[]) => {
+  const persistStickyNotes = useCallback((nextNotes: StickyNoteData[]) => {
     setStickyNotes(nextNotes);
     window.localStorage.setItem('crimson-sticky-notes', JSON.stringify(nextNotes));
-  };
+  }, []);
+
+  const handleSaveStickyNote = useCallback((text: string, color: 'yellow' | 'pink' | 'blue' | 'green') => {
+    if (!stickyEditorTarget) return;
+    const newNote: StickyNoteData = {
+      id: `sticky-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      entityId: stickyEditorTarget.entityId,
+      text,
+      color,
+      createdAt: new Date().toISOString(),
+    };
+    persistStickyNotes([...stickyNotes, newNote]);
+    setStickyEditorTarget(null);
+    // Close the entity peek panel so the investigator can see the note on the graph
+    setSelectedNode(null);
+    setSelectedGraphPosition(null);
+    setSelectedNodePosition(null);
+    setEntityDetailOpen(false);
+  }, [stickyEditorTarget, stickyNotes, persistStickyNotes]);
+
+  const handleDeleteStickyNote = useCallback((noteId: string) => {
+    persistStickyNotes(stickyNotes.filter((n) => n.id !== noteId));
+  }, [stickyNotes, persistStickyNotes]);
+
+  const handleClickStickyNote = useCallback((entityId: string) => {
+    // Focus graph on the entity
+    graphRef.current?.focusNode(entityId);
+  }, []);
+
+  const handleUpdateNoteOffset = useCallback((noteId: string, offsetX: number, offsetY: number) => {
+    persistStickyNotes(
+      stickyNotes.map((n) => n.id === noteId ? { ...n, offsetX, offsetY } : n)
+    );
+  }, [stickyNotes, persistStickyNotes]);
 
   const handleSave = useCallback(() => {
     window.localStorage.setItem(
@@ -537,14 +567,22 @@ export default function InvestigationDashboard() {
                 onNodeExpand={handleNodeExpand}
               />
 
+              {/* Sticky Note Overlay — always visible, tracks entity positions */}
+              <StickyNoteOverlay
+                notes={stickyNotes}
+                graphRef={graphRef}
+                onDeleteNote={handleDeleteStickyNote}
+                onClickNote={handleClickStickyNote}
+                onUpdateNoteOffset={handleUpdateNoteOffset}
+              />
+
               {selectedNode && selectedNodePosition && !entityDetailOpen && (
                 <div style={{ position: 'absolute', left: selectedNodePosition.x, top: selectedNodePosition.y, zIndex: 24 }}>
                   <EntityPeek
                     node={selectedNode}
                     onBrief={() => setEntityDetailOpen(true)}
                     onAddNote={() => {
-                      const note = { id: `sticky-${Date.now()}`, nodeId: selectedNode.id, text: '', color: 'yellow' as const };
-                      persistStickyNotes([...stickyNotes, note]);
+                      setStickyEditorTarget({ entityId: selectedNode.id, entityName: selectedNode.name });
                     }}
                     onClose={() => {
                       setSelectedNode(null);
@@ -554,45 +592,6 @@ export default function InvestigationDashboard() {
                   />
                 </div>
               )}
-
-              {selectedNode && selectedGraphPosition && stickyNotes.filter((note) => note.nodeId === selectedNode.id).map((note) => (
-                <div
-                  key={note.id}
-                  className={`sticky-note sticky-${note.color}`}
-                  style={{
-                    left: graphAreaRef.current
-                      ? Math.min(selectedGraphPosition.x + 110, graphAreaRef.current.clientWidth - 202)
-                      : selectedGraphPosition.x + 110,
-                    top: Math.min(Math.max(70, selectedGraphPosition.y), graphAreaRef.current ? graphAreaRef.current.clientHeight - 80 : selectedGraphPosition.y),
-                  }}
-                >
-                  <div className="sticky-note-header">
-                    <StickyNote size={12} />
-                    <button onClick={() => persistStickyNotes(stickyNotes.filter((item) => item.id !== note.id))} title="Delete sticky note">×</button>
-                  </div>
-                  <textarea
-                    autoFocus={!note.text}
-                    value={note.text}
-                    placeholder="Important detail..."
-                    onChange={(event) => persistStickyNotes(stickyNotes.map((item) => item.id === note.id ? { ...item, text: event.target.value } : item))}
-                  />
-                  <div className="sticky-colors">
-                    {(['yellow', 'pink', 'blue', 'green'] as const).map((color) => (
-                      <button key={color} className={`sticky-color-dot sticky-color-${color}`} onClick={() => persistStickyNotes(stickyNotes.map((item) => item.id === note.id ? { ...item, color } : item))} aria-label={`Use ${color} sticky color`} />
-                    ))}
-                    <button
-                      className="sticky-save-button"
-                      onClick={() => {
-                        persistStickyNotes(stickyNotes);
-                        setActionMessage('Sticky note saved');
-                        window.setTimeout(() => setActionMessage(''), 1800);
-                      }}
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-              ))}
 
               {selectedNode && selectedNodePosition && entityDetailOpen && (
                 <div style={{ position: 'absolute', left: selectedNodePosition.x, top: selectedNodePosition.y, transform: 'translateY(-50%)' }}>
@@ -664,6 +663,17 @@ export default function InvestigationDashboard() {
           <EvidencePanel edge={selectedEdge} nodes={nodes} onClose={() => setSelectedEdge(null)} />
         </div>
       )}
+
+      {/* ── Sticky Note Editor Modal ────────────────────────────────────────── */}
+      {stickyEditorTarget && (
+        <StickyNoteEditor
+          entityId={stickyEditorTarget.entityId}
+          entityName={stickyEditorTarget.entityName}
+          onSave={handleSaveStickyNote}
+          onCancel={() => setStickyEditorTarget(null)}
+        />
+      )}
+
       {actionMessage && <div className="fade-in" style={{ position: 'fixed', bottom: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 120, padding: '9px 14px', borderRadius: 6, background: 'var(--text-primary)', color: 'white', fontSize: 12 }}>{actionMessage}</div>}
     </div>
   );

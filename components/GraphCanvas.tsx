@@ -19,6 +19,9 @@ export interface GraphCanvasRef {
   resetView: () => void;
   highlightNew: (nodeIds: string[], edgeIds: string[]) => void;
   clearHighlights: () => void;
+  getNodePosition: (nodeId: string) => { x: number; y: number } | null;
+  getNodePositions: (nodeIds: string[]) => Record<string, { x: number; y: number }>;
+  getZoom: () => number;
 }
 
 interface TooltipState {
@@ -498,6 +501,31 @@ const GraphCanvas = forwardRef<GraphCanvasRef, Props>((props, ref) => {
     clearHighlights() {
       cyRef.current?.elements().removeClass('new-highlight dimmed highlighted');
     },
+    getNodePosition(nodeId: string) {
+      const cy = cyRef.current;
+      if (!cy) return null;
+      const target = cy.$id(nodeId);
+      if (target.length === 0) return null;
+      const pos = target.renderedPosition();
+      return { x: pos.x, y: pos.y };
+    },
+    getNodePositions(nodeIds: string[]) {
+      const cy = cyRef.current;
+      const result: Record<string, { x: number; y: number }> = {};
+      if (!cy) return result;
+      for (const nodeId of nodeIds) {
+        const target = cy.$id(nodeId);
+        if (target.length > 0) {
+          const pos = target.renderedPosition();
+          result[nodeId] = { x: pos.x, y: pos.y };
+        }
+      }
+      return result;
+    },
+    getZoom() {
+      const cy = cyRef.current;
+      return cy ? cy.zoom() : 1;
+    }
   }));
 
   return (

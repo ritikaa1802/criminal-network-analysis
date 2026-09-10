@@ -640,3 +640,34 @@ input[type='range']::-webkit-slider-thumb:hover {
   cursor: pointer;
   accent-color: var(--text-primary);
 }
+
+/* ── Saved Sticky Note Overlay ──────────────────────────────────────────── */
+.saved-sticky-note {
+  animation: sticky-appear 0.25s ease-out forwards;
+}
+.saved-sticky-note:hover {
+  box-shadow: 3px 5px 16px rgba(15, 23, 42, 0.2) !important;
+  transform: rotate(0deg) !important;
+}
+@keyframes sticky-appear {
+  from {
+    opacity: 0;
+    transform: rotate(-0.5deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-0.5deg) scale(1);
+  }
+}
+
+/* Thin scrollbar inside saved notes */
+.saved-sticky-note div::-webkit-scrollbar {
+  width: 3px;
+}
+.saved-sticky-note div::-webkit-scrollbar-track {
+  background: transparent;
+}
+.saved-sticky-note div::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+  border-radius: 2px;
+}
