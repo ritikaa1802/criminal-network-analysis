@@ -68,8 +68,8 @@ export default function ChatbotWidget({ docked = false, onClose, headerMode = fa
   if (headerMode) {
     return (
       <div style={{ position: 'relative' }}>
-        <button className="header-action" onClick={() => setOpen((current) => !current)} title="Open Connor AI assistant" aria-label="Open Connor AI assistant">
-          <Bot size={14} />
+        <button className="connor-launcher" onClick={() => setOpen((current) => !current)} title="Open Connor AI assistant" aria-label="Open Connor AI assistant">
+          <Bot size={25} />
         </button>
         {open && (
           <div style={{ position: 'fixed', top: 'var(--header-height)', right: 0, bottom: 0, width: 360, zIndex: 120, background: '#ffffff', border: '1px solid var(--panel-border)', boxShadow: 'var(--panel-shadow)' }}>

@@ -24,7 +24,7 @@ export default function EmptyState({ onUpload }: Props) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--surface-0)',
+        background: 'var(--surface-2)',
       }}
     >
       <div

@@ -54,7 +54,7 @@ body {
   height: 100%;
   overflow: hidden;
   font-family: var(--font-inter);
-  background: var(--surface-0);
+  background: var(--surface-1);
   color: var(--text-primary);
 }
 
@@ -291,6 +291,22 @@ main {
 .header-action-blue:hover { background: #1e3a8a; border-color: #1e3a8a; }
 .header-action-dark { background: #0f172a; border-color: #334155; color: white; }
 .header-action-dark:hover { background: #1e3a8a; border-color: #1e3a8a; }
+.header-action-create { padding: 9px 14px; font-size: 12px; }
+
+.connor-launcher {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  color: #60a5fa;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.connor-launcher:hover { background: #1e3a8a; color: #ffffff; }
 
 .resize-handle {
   width: 6px;

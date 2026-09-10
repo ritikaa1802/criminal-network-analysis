@@ -348,7 +348,7 @@ export default function InvestigationDashboard() {
             width: leftWidth,
             flexShrink: 0,
             borderRight: '1px solid var(--panel-border)',
-            background: '#ffffff',
+            background: 'var(--surface-1)',
             boxShadow: 'var(--panel-shadow)',
             display: 'flex',
             flexDirection: 'column',
@@ -431,7 +431,9 @@ export default function InvestigationDashboard() {
             flexDirection: 'column',
             overflow: 'hidden',
             position: 'relative',
-            background: '#f8fafc',
+            background: 'var(--surface-2)',
+            backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
           }}
         >
           {!leftRailOpen && (

@@ -81,11 +81,10 @@ export default function Header({ onCreate, onSave, onShare }: Props) {
 
       {/* Right: Workspace actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button className="header-action header-action-blue" onClick={onCreate} title="Create a new investigation">
+        <button className="header-action header-action-blue header-action-create" onClick={onCreate} title="Create a new investigation">
           <Plus size={14} />
           <span>Create</span>
         </button>
-        <ChatbotWidget headerMode />
         <button className="header-action header-action-dark" onClick={onSave} title="Save investigation locally">
           <Save size={14} />
           <span>Save</span>
@@ -94,6 +93,7 @@ export default function Header({ onCreate, onSave, onShare }: Props) {
           <Share2 size={14} />
           <span>Share</span>
         </button>
+        <ChatbotWidget headerMode />
       </div>
     </header>
   );
